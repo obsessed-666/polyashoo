@@ -4,44 +4,40 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Интернет открыточка Полиночке</title>
+<title>Интернет открыточка Полиночке — фикс</title>
+
+<!-- Подключаем шрифты для красивого прописного/красивого текста -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --bg:#030312; --fg:#f6f6f6; --muted:rgba(255,255,255,0.14);
   --accent-start:#ff9db5; --accent-end:#ff6b8f;
-  --glass:rgba(255,255,255,0.03); --shadow:0 22px 90px rgba(0,0,0,0.7);
-  --safe-zone:92px;
-  --music-target:0.6;
-  --music-fade:2.4s;
+  --shadow:0 22px 90px rgba(0,0,0,0.7);
+  --music-target:0.6; --music-fade:2.4s;
 }
-/* basic */
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;touch-action:manipulation}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:contain}
 button{font-family:inherit;border:0;cursor:pointer}
-a{color:inherit}
 
-/* background */
-#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.92) saturate(1.03)}
-.overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1}
+/* --- Background video --- */
+#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:0;-webkit-transform:translateZ(0);will-change:transform;filter:brightness(0.93) saturate(1.02)}
+.overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1;pointer-events:none}
 
-/* cinematic bars */
+/* cinematic letterboxes */
 .letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:0;background:#000;z-index:40;pointer-events:none}
 .letterbox-top{top:0} .letterbox-bottom{bottom:0}
 
-/* app shell */
-.app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+/* app */
+.app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
 
-/* frame */
-.frame{width:100%;max-width:1120px;height:82vh;max-height:880px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:all .48s cubic-bezier(.2,.9,.2,1)}
-.frame.collapsed{grid-template-columns:0 1fr}
+/* main frame */
+.frame{width:100%;max-width:1120px;height:82vh;max-height:880px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:all .44s cubic-bezier(.2,.9,.2,1)}
+/* avoid relying on grid collapse alone; hide panel via transform */
+.frame.collapsed .left{transform:translateX(-120%);opacity:0;pointer-events:none}
 
 /* left panel */
-.left{
-  padding:18px;border-right:1px solid rgba(255,255,255,0.02);
-  display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));
-  overflow:hidden;
-}
+.left{padding:16px;border-right:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));overflow:hidden;transition:transform .44s ease, opacity .44s ease}
 .header-left{display:flex;align-items:center;gap:12px}
 .avatar-wrap{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-start),#6bd0ff);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
@@ -56,45 +52,34 @@ a{color:inherit}
 @keyframes blink{0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25}}
 
 /* right area */
-.right{position:relative;padding:18px;display:flex;flex-direction:column;gap:12px}
+.right{position:relative;padding:16px;display:flex;flex-direction:column;gap:12px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .title-wrap{flex:1;display:flex;align-items:center;justify-content:center}
 .title{
-  font-family: "Georgia","Times New Roman", Times, serif;
-  font-weight:800;
-  font-size:36px;
+  font-family:'Playfair Display', serif;
+  font-weight:900;
+  font-size:34px;
   text-transform:uppercase;
-  letter-spacing:1px;
+  letter-spacing:1.2px;
   margin:0;
   line-height:1;
   background:linear-gradient(90deg,#fff 0%, #ffd6e6 30%, #ffb0d0 60%, #fff 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  text-shadow:0 8px 30px rgba(0,0,0,0.35);
-  filter:drop-shadow(0 6px 30px rgba(0,0,0,0.25));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  background-size:300% 100%;
+  text-shadow:0 8px 30px rgba(0,0,0,0.28);
+  animation:shimmer 6s linear infinite;
   display:inline-block;
   will-change:transform;
 }
-/* shimmer gradient animation for title */
-@keyframes shimmer {
-  0%{background-position: -120% 0}
-  100%{background-position: 220% 0}
-}
-.title{background-size:300% 100%; animation: shimmer 5s linear infinite;}
+@keyframes shimmer{0%{background-position:-120% 0}100%{background-position:220% 0}}
 
-/* per-letter bounce (we wrap letters in spans .char with --i index) */
-.char{display:inline-block;transform-origin:center;animation:letterFloat 1.6s ease-in-out infinite; will-change:transform; }
-@keyframes letterFloat{
-  0%{transform:translateY(0)}
-  30%{transform:translateY(-6px)}
-  60%{transform:translateY(3px)}
-  100%{transform:translateY(0)}
-}
+/* per-letter float (title) */
+.title .char{display:inline-block; animation:letterFloat 1.6s ease-in-out infinite; transform-origin:center; }
+@keyframes letterFloat{0%{transform:translateY(0)}30%{transform:translateY(-6px)}60%{transform:translateY(3px)}100%{transform:translateY(0)}}
 
-/* HUD */
+/* hud */
 .hud{display:flex;align-items:center;gap:10px}
-.score{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:var(--glass);padding:8px 12px;border-radius:10px}
+.score{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px}
 .saved-row{display:flex;gap:8px;align-items:center}
 .saved-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform 160ms}
 .saved-thumb img{width:100%;height:100%;object-fit:cover}
@@ -102,58 +87,62 @@ a{color:inherit}
 .btn{padding:8px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:white;font-weight:700}
 .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--fg);padding:8px 12px}
 
-/* game area */
+/* game */
 .game-wrap{flex:1;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .game-canvas{position:absolute;inset:0;pointer-events:none;z-index:6}
-.drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:ui-monospace, monospace;z-index:7}
+.drop-area{position:absolute;right:16px;bottom:16px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:ui-monospace, monospace;z-index:7}
 
-/* memory cards: contain image (no crop), add small padding and border-radius */
+/* memory cards */
 .memory{
-  position:absolute;
-  pointer-events:auto;
-  user-select:none;
-  touch-action:none;
-  width:120px;height:120px;
-  border-radius:12px;
-  background:rgba(255,255,255,0.02);
+  position:absolute;pointer-events:auto;user-select:none;touch-action:none;
+  width:120px;height:120px;border-radius:12px;background:rgba(255,255,255,0.02);
   display:flex;align-items:center;justify-content:center;overflow:hidden;
   box-shadow:0 18px 48px rgba(0,0,0,0.55);
   transition:transform 220ms ease, opacity 220ms;
-  will-change:transform, top, left;
-  padding:8px;
+  padding:8px; will-change:transform, top, left;
 }
-.memory img{width:100%;height:100%;object-fit:contain;display:block;border-radius:8px;}
+.memory img{width:100%;height:100%;object-fit:contain;border-radius:8px;display:block}
 
 /* final overlay */
 .final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px;gap:18px;text-align:center;opacity:0;pointer-events:none;z-index:80;transition:opacity .45s ease}
 .final-wrap.active{opacity:1;pointer-events:auto}
 .romantic{
-  font-family: "Georgia","Times New Roman", Times, serif;
-  font-size:22px;
-  max-width:920px;
+  font-family:'Great Vibes', 'Playfair Display', serif;
+  font-size:34px;
   color:#fff;
-  line-height:1.45;
-  transform-origin:center;
-  text-shadow:0 10px 30px rgba(0,0,0,0.6);
+  max-width:920px;
+  line-height:1.25;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  text-shadow:0 12px 40px rgba(0,0,0,0.6);
+  will-change:transform;
 }
-.romantic p{margin:10px 0;opacity:0;transform:translateY(14px) scale(.99);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.9,.2,1)}
-.romantic p.visible{opacity:1;transform:translateY(0) scale(1)}
+/* animate each letter in romantic as well */
+.romantic .rchar{display:inline-block;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.9,.2,1)}
+.romantic .rchar.visible{opacity:1;transform:translateY(0) scale(1)}
+/* pulsing whole romantic block */
+@keyframes romanticPulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+.romantic.pulse{animation:romanticPulse 3.6s ease-in-out infinite}
 
-/* fancy heart (SVG container) */
-.heart-svg{width:140px;height:140px;display:flex;align-items:center;justify-content:center;cursor:pointer;filter:drop-shadow(0 20px 50px rgba(255,80,120,0.15));animation:heartPulse 1.6s infinite}
-@keyframes heartPulse{0%{transform:scale(.98)}50%{transform:scale(1.06)}100%{transform:scale(.98)}}
+/* SVG heart container */
+.heart-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.heart-svg{width:140px;height:140px;cursor:pointer;filter:drop-shadow(0 20px 50px rgba(255,80,120,0.15));transition:transform .18s ease}
+.heart-svg:active{transform:scale(.95)}
 
-/* modal & viewer */
+/* vignette */
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.25) 100%);z-index:8}
+
+/* modal viewer */
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:100;padding:18px}
 .modal.active{display:flex}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;max-width:1100px;width:100%;max-height:84vh;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-width:1100px;width:100%;max-height:84vh;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
 .thumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 18px 48px rgba(0,0,0,0.6);cursor:pointer;position:relative;transition:transform .22s}
 .thumb img{width:100%;height:120px;object-fit:cover;display:block}
 .viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);z-index:120;padding:20px}
 .viewer.active{display:flex}
 .viewer .card{max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18));box-shadow:0 40px 140px rgba(0,0,0,0.8)}
 
-/* small screen adjustments */
+/* responsive */
 @media (max-width:980px){
   .frame{grid-template-columns:1fr}
   .left{order:2}
@@ -161,15 +150,18 @@ a{color:inherit}
   .frame{height:88vh}
   .drop-area{right:12px;left:12px;width:auto}
   .title{font-size:28px}
+  .romantic{font-size:28px}
+  .memory{width:100px;height:100px}
   .heart-svg{width:110px;height:110px}
 }
 </style>
 </head>
 <body>
 
-<!-- background video -->
-<video id="bg-video" autoplay muted loop playsinline webkit-playsinline>
+<!-- Background video; keep muted & playsinline for mobile autoplay -->
+<video id="bg-video" autoplay muted loop playsinline webkit-playsinline preload="auto">
   <source src="bg.mp4" type="video/mp4">
+  <!-- fallback background color -->
 </video>
 <div class="overlay" aria-hidden="true"></div>
 
@@ -183,7 +175,7 @@ a{color:inherit}
     <div class="left" id="leftPane" aria-label="Сообщения">
       <div class="header-left">
         <div class="avatar-wrap" id="avatarWrap">
-          <img id="avatarImg" src="avatar.jpg" alt="P" onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'">
+          <img id="avatarImg" src="avatar.jpg" alt="P" onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'"/>
           <div id="avatarFallback" class="avatar-fallback" style="display:none">P</div>
         </div>
         <div>
@@ -203,7 +195,10 @@ a{color:inherit}
     <!-- RIGHT -->
     <div class="right" id="rightPane" aria-label="Игровая сцена">
       <div class="topbar">
-        <div class="title-wrap"><div id="title" class="title">БОМБЁЖКА МИЛОТОЙ</div></div>
+        <div class="title-wrap">
+          <div id="title" class="title">БОМБЁЖКА МИЛОТОЙ</div>
+        </div>
+
         <div class="hud">
           <div class="score" id="scoreBox">0</div>
           <div class="saved-row" id="savedBar" aria-hidden="false"></div>
@@ -215,14 +210,13 @@ a{color:inherit}
         <div class="game-canvas" id="gameArea"></div>
         <div class="drop-area" id="dropArea">Перетащи сюда — сохранить</div>
 
-        <!-- final overlay -->
+        <!-- final overlay: romantic text + heart + finalVideo (hidden until heart click) -->
         <div class="final-wrap" id="finalWrap" aria-hidden="true">
           <div class="romantic" id="romanticText" aria-hidden="true"></div>
 
-          <div id="heartContainer" style="display:none">
-            <!-- SVG heart with gradient + arrow; no background so it's "floating" -->
-            <div class="heart-svg" id="heartSvgWrap" title="Нажми, чтобы продолжить">
-              <!-- inline SVG heart + arrow -->
+          <div class="heart-wrap" id="heartContainer" style="display:none">
+            <div class="heart-svg" id="heartSvgWrap" title="Нажми, чтобы увидеть финал">
+              <!-- SVG gradient heart + arrow -->
               <svg viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Сердце">
                 <defs>
                   <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
@@ -230,31 +224,24 @@ a{color:inherit}
                     <stop offset="50%" stop-color="#ff6b8f"/>
                     <stop offset="100%" stop-color="#ff4a7a"/>
                   </linearGradient>
-                  <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#ff6b8f" flood-opacity="0.14"/>
+                  <filter id="s1" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#ff6b8f" flood-opacity="0.16"/>
                   </filter>
                 </defs>
-
-                <!-- heart shape -->
-                <g filter="url(#shadow)">
-                  <path id="heartPath" d="M100 170c-30-18-62-42-74-62-12-20-2-46 18-52 16-5 36 2 46 16 10-14 30-21 46-16 20 6 30 32 18 52-12 20-44 44-74 62z" fill="url(#g1)" stroke="rgba(255,255,255,0.08)" stroke-width="2" />
+                <g filter="url(#s1)">
+                  <path d="M100 170c-30-18-62-42-74-62-12-20-2-46 18-52 16-5 36 2 46 16 10-14 30-21 46-16 20 6 30 32 18 52-12 20-44 44-74 62z" fill="url(#g1)" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
                 </g>
-
-                <!-- arrow piercing through the heart -->
-                <g transform="translate(-10,-20) rotate(-18 100 100)" opacity="0.95">
-                  <rect x="20" y="96" width="160" height="6" rx="3" fill="#d0d0d0" />
-                  <polygon points="12,90 20,96 12,102" fill="#d0d0d0"/>
+                <g transform="translate(-8,-20) rotate(-16 100 100)" opacity="0.95">
+                  <rect x="18" y="96" width="160" height="7" rx="3" fill="#cfcfcf" />
+                  <polygon points="10,90 18,96 10,102" fill="#cfcfcf"/>
                   <polygon points="188,96 200,92 200,100" fill="#fff2"/>
                 </g>
-
-                <!-- small glossy highlight -->
-                <ellipse cx="75" cy="65" rx="22" ry="10" fill="rgba(255,255,255,0.12)" transform="rotate(-25 75 65)"/>
+                <ellipse cx="74" cy="62" rx="22" ry="10" fill="rgba(255,255,255,0.12)" transform="rotate(-25 74 62)"/>
               </svg>
             </div>
-            <div style="margin-top:10px;color:var(--muted);font-size:13px">Нажми на сердце, чтобы продолжить</div>
+            <div style="margin-top:8px;color:var(--muted);font-size:13px">Нажми на сердце, чтобы продолжить</div>
           </div>
 
-          <!-- final video hidden until heart click -->
           <video id="finalVideo" class="hidden" playsinline controls style="width:100%;max-height:420px;border-radius:12px;overflow:hidden;display:none"></video>
         </div>
 
@@ -281,12 +268,12 @@ a{color:inherit}
   <div class="card" id="viewerCard" style="max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden"></div>
 </div>
 
-<!-- audio elements -->
+<!-- audio -->
 <audio id="music" src="music.mp3" preload="auto" loop></audio>
 <audio id="click" src="click.mp3" preload="auto"></audio>
 
 <script>
-/* CONFIG — ожидает файлы в корне репозитория */
+/* ========== CONFIG ========== */
 const CONFIG = {
   memories:[
     {type:'img', content:'mem1.jpg'},
@@ -303,12 +290,13 @@ const CONFIG = {
   maxSimultaneous:4,
   finalMedia:'final.mp4'
 };
+/* ============================ */
 
-/* short selectors */
-const $ = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
+/* Short selectors */
+const $ = s=>document.querySelector(s);
+const $$ = s=>Array.from(document.querySelectorAll(s));
 
-/* UI references */
+/* UI refs */
 const frame = $('#frame'), leftPane = $('#leftPane');
 const startBtn = $('#startBtn'), typing = $('#typing');
 const chatArea = $('#chatArea'), gameArea = $('#gameArea'), dropArea = $('#dropArea');
@@ -322,13 +310,11 @@ const clearSaved = $('#clearSaved');
 const musicEl = document.getElementById('music'), clickEl = document.getElementById('click');
 
 let activeMemories = [], spawnTimer = null, score = 0;
-let savedMemories = []; // in-memory for this session only
+let savedMemories = []; // in-memory for session only
 
-/* AUDIO (WebAudio for smooth fade) */
+/* Audio using WebAudio for soft fades */
 let audioCtx = null, musicSource = null, musicGain = null, audioInitialized = false;
-const MUSIC_TARGET = 0.6;
-const MUSIC_FADE_SEC = 2.4;
-
+const MUSIC_TARGET = 0.6, MUSIC_FADE_SEC = 2.4;
 function initAudioOnce(){
   if(audioInitialized) return;
   audioInitialized = true;
@@ -355,22 +341,22 @@ function startMusic(){
     const p = musicEl.play();
     if(p && p.then) p.then(()=>{ fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC); }).catch(()=>{});
     else fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC);
-  }catch(e){}
+  }catch(e){ console.warn(e); }
 }
 function softStopMusic(){
-  if(!musicGain || !audioCtx){ try{ musicEl.pause() }catch(e){}; return; }
+  if(!musicGain || !audioCtx){ try{ musicEl.pause(); }catch(e){}; return; }
   const now = audioCtx.currentTime;
   musicGain.gain.cancelScheduledValues(now);
   musicGain.gain.setValueAtTime(musicGain.gain.value, now);
   musicGain.gain.linearRampToValueAtTime(0, now + 0.9);
-  setTimeout(()=>{ try{ musicEl.pause() }catch(e){} }, 1000);
+  setTimeout(()=>{ try{ musicEl.pause(); }catch(e){} }, 1000);
 }
-function playClick(){ if(clickEl){ clickEl.currentTime = 0; clickEl.play().catch(()=>{}); } }
+function playClick(){ if(clickEl){ try{ clickEl.currentTime=0; clickEl.play().catch(()=>{}); }catch(e){} }}
 
-/* helper */
+/* small util */
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-/* Chat intro & cinematic bars */
+/* Chat sequence */
 const storySequence = [
   'приветки поля, я немного стесняюсь',
   'я может и просто бегущая строка - но я вижу как ты необычайно красива сегодня',
@@ -379,10 +365,20 @@ const storySequence = [
   'готова? тык "начать"'
 ];
 
+/* romantic paragraphs (same as user provided) */
+const FINAL_PARAGRAPHS = [
+`Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
+`Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
+`Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
+`Если бы я был слепым — ты была бы моим зрением.<br>Если бы я был глухим — ты была бы моим слухом.<br>Если бы я был немым — ты была бы моим голосом.`,
+`Если бы не было тебя — не было бы меня.<br><br>Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
+];
+
+/* Entry cinematic */
 (async function entry(){
   lbTop.style.height='0px'; lbBottom.style.height='0px';
-  requestAnimationFrame(()=>{ lbTop.style.transition='height 480ms ease'; lbBottom.style.transition='height 480ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
-  await sleep(760);
+  requestAnimationFrame(()=>{ lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
+  await sleep(680);
   await runChatIntro();
   lbTop.style.height='0px'; lbBottom.style.height='0px';
 })();
@@ -401,10 +397,10 @@ async function runChatIntro(){
 function appendChat(who, text){
   const el = document.createElement('div'); el.className = 'msg ' + (who==='me' ? 'me' : 'them'); el.innerHTML = `<div>${text}</div>`;
   chatArea.appendChild(el); chatArea.scrollTop = chatArea.scrollHeight;
-  el.style.opacity = 0; el.style.transform = 'translateY(8px)'; requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity = 1; el.style.transform = 'translateY(0)'; });
+  el.style.opacity=0; el.style.transform='translateY(8px)'; requestAnimationFrame(()=>{ el.style.transition='opacity 360ms, transform 360ms'; el.style.opacity=1; el.style.transform='translateY(0)'; });
 }
 
-/* Title per-letter wrap + staggered float */
+/* Wrap title letters to animate per-letter float */
 function wrapTitleLetters(){
   const t = $('#title');
   const txt = t.textContent.trim();
@@ -413,15 +409,27 @@ function wrapTitleLetters(){
     const ch = document.createElement('span');
     ch.textContent = txt[i];
     ch.className = 'char';
-    ch.style.setProperty('--i', i);
-    // stagger animation speed slightly by delay
-    ch.style.animationDelay = `${(i % 10) * 0.06}s`;
+    // stagger
+    ch.style.animationDelay = `${(i%10)*0.06}s`;
     t.appendChild(ch);
   }
 }
 wrapTitleLetters();
 
-/* Start button behavior: init audio, start music, collapse left pane completely */
+/* Wrap romantic letters for animated appearance */
+function wrapRomanticTextIntoSpans(str){
+  // create container where each letter gets .rchar
+  const frag = document.createDocumentFragment();
+  for(let i=0;i<str.length;i++){
+    const ch = document.createElement('span');
+    ch.className = 'rchar';
+    ch.textContent = str[i];
+    frag.appendChild(ch);
+  }
+  return frag;
+}
+
+/* Start button */
 startBtn.addEventListener('click', async ()=>{
   initAudioOnce();
   if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume().catch(()=>{});
@@ -432,29 +440,28 @@ startBtn.addEventListener('click', async ()=>{
   await sleep(140);
 
   appendChat('me','Окей — начинаем!');
-  // collapse left pane visually and then remove it from flow after animation
+  // Collapse frame visually (hide left panel via transform)
   frame.classList.add('collapsed');
-  leftPane.style.transition = 'opacity 420ms ease';
   leftPane.style.opacity = '0';
-  // after layout animation completes (match frame transition time)
-  setTimeout(()=>{ leftPane.style.display = 'none'; }, 520);
-
-  await sleep(420);
+  leftPane.style.pointerEvents = 'none';
+  // After animation we keep it hidden (no display:none to avoid layout jump)
+  await sleep(520);
   initGame();
 });
 
-/* Game: spawn / falling / save */
+/* Game init & spawn */
 function initGame(){
   score = 0; updateScore();
-  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im=new Image(); im.src = m.content; }});
+  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
   spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
   spawnMemory();
   renderSavedBar();
 }
 
+/* Spawn memory card */
 function spawnMemory(){
   const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
-  const node = document.createElement('div'); node.className = 'memory';
+  const node = document.createElement('div'); node.className='memory';
   node.style.left = (6 + Math.random()*88) + '%';
   node.style.top = '-160px';
   node.tabIndex = 0;
@@ -463,28 +470,25 @@ function spawnMemory(){
   node.appendChild(img);
 
   gameArea.appendChild(node);
-  const mem = {el: node, y: -160, id: Date.now()+Math.random(), meta: template};
+  const mem = {el:node, y:-160, id:Date.now()+Math.random(), meta:template};
   activeMemories.push(mem);
 
-  node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(mem); });
-  node.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(mem); });
+  node.addEventListener('click',(e)=>{ e.stopPropagation(); saveMemory(mem); });
+  node.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(mem); });
 
-  // pointer drag
+  // drag
   let dragging=false, sx=0, sy=0, ox=0, oy=0;
-  node.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; sx=ev.clientX; sy=ev.clientY; ox = parseFloat(node.style.left); oy=mem.y; node.style.transition='transform 0s'; });
-  node.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const dx = ev.clientX - sx; const dy = ev.clientY - sy; mem.y = oy + dy; node.style.top = mem.y + 'px'; node.style.left = Math.max(2, Math.min(92, ox + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)) dropArea.style.borderColor='rgba(255,255,255,0.7)'; else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
-  node.addEventListener('pointerup', (ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(mem); });
+  node.addEventListener('pointerdown',(ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; sx=ev.clientX; sy=ev.clientY; ox=parseFloat(node.style.left); oy=mem.y; node.style.transition='transform 0s'; });
+  node.addEventListener('pointermove',(ev)=>{ if(!dragging) return; const dx=ev.clientX-sx; const dy=ev.clientY-sy; mem.y = oy + dy; node.style.top = mem.y + 'px'; node.style.left = Math.max(2, Math.min(92, ox + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)) dropArea.style.borderColor='rgba(255,255,255,0.7)'; else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
+  node.addEventListener('pointerup',(ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(mem); });
 
-  // small random rotation to make layout lively but keep image contained
+  // slight rotation for vibe but image contained
   node.style.transform = `rotate(${(Math.random()*6-3)}deg)`;
 }
 
-/* ticker: move down */
+/* ticker */
 const ticker = setInterval(()=>{
-  activeMemories.forEach(m=>{
-    m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5));
-    if(m.el) m.el.style.top = (m.y) + 'px';
-  });
+  activeMemories.forEach(m=>{ m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5)); if(m.el) m.el.style.top = (m.y) + 'px'; });
   activeMemories = activeMemories.filter(m=>{
     if(!m.el) return false;
     const r = m.el.getBoundingClientRect();
@@ -495,7 +499,7 @@ const ticker = setInterval(()=>{
 
 function intersect(r1,r2){ return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top); }
 
-/* save memory (in-memory only), animate fly-out */
+/* save memory */
 function saveMemory(mem){
   if(!mem || !mem.el) return;
   mem.el.style.transition='transform 360ms cubic-bezier(.2,.9,.2,1), opacity 360ms';
@@ -516,23 +520,22 @@ function saveMemory(mem){
 function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,107,143,0.04)'; setTimeout(()=>{ document.body.style.boxShadow=''; },260); }
 function updateScore(){ scoreBox.textContent = score; }
 
-/* render saved thumbnails */
+/* render saved bar */
 function renderSavedBar(){
   savedBar.innerHTML = '';
   const list = savedMemories.slice(-6);
   list.forEach(item=>{
     const el = document.createElement('div'); el.className = 'saved-thumb';
-    const img = document.createElement('img'); img.src = item.content;
-    el.appendChild(img);
+    const img = document.createElement('img'); img.src = item.content; el.appendChild(img);
     el.addEventListener('click', ()=> openViewer(item));
     savedBar.appendChild(el);
   });
 }
 
-/* final sequence: show romantic text then heart (music keeps playing) */
+/* final sequence: show romantic text then heart (music continues). */
 async function triggerFinalSequence(){
   stopSpawning();
-  await sleep(420);
+  await sleep(380);
   lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease';
   lbTop.style.height='72px'; lbBottom.style.height='72px';
   await sleep(520);
@@ -541,40 +544,54 @@ async function triggerFinalSequence(){
   appendChat('them','Особенно чувства.');
   await sleep(720);
 
-  // reveal romantic overlay: each paragraph appears with subtle animated entrance
+  // Reveal romantic overlay with per-letter animated appearance
   finalWrap.classList.add('active');
   romanticText.innerHTML = '';
-  for(let i=0;i<FINAL_PARAGRAPHS.length;i++){
-    const p = document.createElement('p'); p.innerHTML = FINAL_PARAGRAPHS[i];
-    romanticText.appendChild(p);
-    // stagger reveal
-    await sleep(360);
-    p.classList.add('visible');
-    await sleep(240);
+  // Use Playfair/GreatVibes uppercase styling via spans
+  // Build a large string of all paragraphs separated by line breaks, but animate paragraph-by-paragraph
+  for(let p of FINAL_PARAGRAPHS){
+    // Create paragraph container
+    const para = document.createElement('div');
+    para.style.margin = '6px 0';
+    // Wrap each letter
+    for(let i=0;i<p.length;i++){
+      const span = document.createElement('span');
+      span.className = 'rchar';
+      span.textContent = p[i];
+      // stagger reveal by small delay (set via dataset and style toggled later)
+      span.style.transitionDelay = `${(i%60)*0.01}s`;
+      para.appendChild(span);
+    }
+    romanticText.appendChild(para);
+    // reveal letters sequentially with slight stagger
+    await sleep(260);
+    Array.from(para.querySelectorAll('.rchar')).forEach((el, idx)=>{
+      setTimeout(()=> el.classList.add('visible'), idx * 12);
+    });
+    // small pause before next paragraph
+    await sleep(500);
   }
-  // show heart after text
-  await sleep(420);
-  heartContainer.style.display = 'block';
+  // add gentle pulse on romantic block
+  romanticText.classList.add('pulse');
+
+  // show heart after short delay
+  await sleep(440);
+  heartContainer.style.display = 'flex';
   // retract letterbox
-  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 1000);
+  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 900);
 }
 function stopSpawning(){ clearInterval(spawnTimer); spawnTimer=null; }
 
-/* heart click => stop music softly and show final video */
+/* Heart click: soft stop music, show final video */
 heartSvgWrap.addEventListener('click', async ()=>{
-  // soft fade music and pause
   softStopMusic();
-
-  // show final video element in overlay
+  heartContainer.style.display = 'none';
   finalVideo.style.display = 'block';
   finalVideo.src = CONFIG.finalMedia;
-  try{ await finalVideo.play(); }catch(e){ /* user can press play */ }
-
-  // hide heart so video visible
-  heartContainer.style.display = 'none';
+  try{ await finalVideo.play(); }catch(e){ /* user may need to press */ }
 });
 
-/* gallery handlers (in-memory only) */
+/* gallery and viewer (session-only) */
 openGalleryBtn.addEventListener('click', openGallery);
 closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; });
 function openGallery(){
@@ -593,23 +610,24 @@ function openGallery(){
   }
   galleryModal.classList.add('active'); galleryModal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
 }
-
-/* viewer */
 function openViewer(item){
   viewerCard.innerHTML = '';
-  const wrap = document.createElement('div');
-  const img = document.createElement('img'); img.src = item.content;
+  const wrap = document.createElement('div'); wrap.style.padding='0';
+  const img = document.createElement('img'); img.src = item.content; img.style.width='100%';
   wrap.appendChild(img);
-  const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = new Date(item.when).toLocaleString();
+  const meta = document.createElement('div'); meta.className='meta'; meta.textContent = new Date(item.when).toLocaleString();
   viewerCard.appendChild(wrap); viewerCard.appendChild(meta);
   viewer.classList.add('active'); viewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
 }
 closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; });
 
-/* clear saved in-memory */
+/* clear saved (session only) */
 clearSaved.addEventListener('click', ()=>{ if(!confirm('Очистить все сохранённые моменты?')) return; savedMemories=[]; renderSavedBar(); alert('Готово — сохранения удалены.'); });
 
-/* small easter for pet images */
+/* stop spawning helper */
+function stopAllTimers(){ try{ clearInterval(spawnTimer); clearInterval(ticker); }catch(e){} }
+
+/* small easter for pets (triple tap) */
 function attachTripleTap(node, cb){
   let taps = [];
   node.addEventListener('pointerdown', (e)=>{ const now = Date.now(); taps.push(now); taps = taps.filter(t => now - t < 1200); if(taps.length >= 3){ taps=[]; try{ cb(); }catch(e){} }});
@@ -621,7 +639,7 @@ function showPetEaster(){
 /* prevent overscroll while dragging */
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
 
-/* init UI: wrap title letters (done earlier) and handle avatar fallback */
+/* init: avatar fallback handling */
 (function initUI(){
   const av = document.getElementById('avatarImg');
   av.addEventListener('error', ()=>{ av.style.display='none'; document.getElementById('avatarFallback').style.display='flex'; });
