@@ -3,314 +3,426 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Подарок — наши моменты</title>
-
+<title>Подарок — интерактив</title>
+<meta name="description" content="Интерактивный романтический лендинг: сообщения, игра, воспоминания, финал" />
 <style>
-  :root{
-    --bg:#050307;
-    --fg:#f6f6f6;
-    --muted:rgba(255,255,255,0.14);
-    --accent:#ff6b8f;
-    --safe-zone:94px;
-    --ui-radius:12px;
-    --shadow: 0 18px 60px rgba(0,0,0,0.6);
-  }
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  a{color:inherit}
+:root{
+  --bg:#030312;
+  --fg:#f5f5f7;
+  --muted:rgba(255,255,255,0.15);
+  --accent:#ff6b8f;
+  --glass: rgba(255,255,255,0.03);
+  --ui-radius:14px;
+  --shadow: 0 20px 80px rgba(0,0,0,0.65);
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+a{color:inherit}
+button{font-family:inherit}
+#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.9) saturate(1.02)}
+.overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1}
+.app{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
 
-  /* Background video */
-  #bg-video{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    z-index:0;
-  }
-  /* dark overlay for readability */
-  .overlay{
-    position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,3,0.35), rgba(2,2,3,0.6));z-index:1;
-  }
+/* Cinematic letterbox bars */
+.letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:0;background:#000;z-index:30;pointer-events:none}
+.letterbox-top{top:0}
+.letterbox-bottom{bottom:0}
 
-  /* Page shell */
-  .app{
-    position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;padding:20px;
-  }
+/* Main frame (center) */
+.frame{width:100%;max-width:1100px;height:80vh;max-height:760px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr}
 
-  /* Center card (holds game) */
-  .container{
-    width:100%;max-width:1000px;height:78vh;max-height:760px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;
-    display:flex;flex-direction:column;
-  }
+/* Left: Telegram-like chat / intro */
+.left{
+  padding:18px;
+  border-right:1px solid rgba(255,255,255,0.02);
+  display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));
+}
+.header-left{display:flex;align-items:center;gap:12px}
+.avatar{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff9db5,#6bd0ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#09090a}
+.chat-area{flex:1;overflow:auto;padding-right:6px}
+.msg{max-width:86%;padding:10px 12px;border-radius:14px;margin:8px 0;position:relative;line-height:1.35}
+.msg.me{margin-left:auto;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))}
+.msg.them{margin-right:auto;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+.msg .small{font-size:12px;color:var(--muted);margin-top:6px;display:block}
 
-  /* Header (title + hint) */
-  .header{
-    padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.02);display:flex;align-items:center;gap:12px;justify-content:space-between;
-  }
-  .title{
-    font-size:18px;font-weight:700;
-  }
-  .hint{color:var(--muted);font-size:13px}
+/* typing indicator */
+.typing{height:26px;display:flex;align-items:center;gap:6px;padding-left:6px}
+.dot{width:7px;height:7px;background:rgba(255,255,255,0.14);border-radius:50%;animation:blink 1200ms infinite}
+.dot:nth-child(2){animation-delay:160ms}
+.dot:nth-child(3){animation-delay:320ms}
+@keyframes blink{0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25}}
 
-  /* HUD: score + saved thumbs + gallery button */
-  .hud{display:flex;align-items:center;gap:12px}
-  .score-box{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:10px;font-size:14px}
-  .saved-bar{display:flex;gap:8px;align-items:center}
-  .saved-thumb{width:44px;height:44px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.14);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transform-origin:center;transition:transform 160ms}
-  .saved-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .saved-thumb:active{transform:scale(0.96)}
-  .btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:#081;cursor:pointer;font-weight:700}
-  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;color:var(--fg)}
+/* Right: game + gallery */
+.right{position:relative;padding:18px;display:flex;flex-direction:column;gap:12px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.title{font-size:18px;font-weight:700}
+.hint{color:var(--muted);font-size:13px}
 
-  /* Game area */
-  .game-area{position:relative;flex:1;display:block;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));overflow:hidden}
-  #gameArea{position:absolute;inset:0;pointer-events:none} /* falling items container */
+/* HUD: score + saved */
+.hud{display:flex;align-items:center;gap:10px}
+.score{font-family:var(--mono);background:var(--glass);padding:8px 12px;border-radius:10px}
+.saved-row{display:flex;gap:8px;align-items:center}
+.saved-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform 160ms}
+.saved-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.saved-thumb:active{transform:scale(.96)}
 
-  /* falling memory card */
-  .memory{
-    position:absolute;pointer-events:auto;user-select:none;touch-action:manipulation;
-    display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    box-shadow:0 16px 46px rgba(0,0,0,0.55);color:var(--fg);font-size:15px;will-change:top,left,transform,filter,opacity;transition:transform 220ms ease,filter 200ms;
-    width:120px;height:120px;
-  }
-  .memory img{max-width:100%;max-height:100%;border-radius:10px;object-fit:cover;display:block}
-  .mem-label{position:absolute;bottom:8px;left:8px;font-size:11px;color:rgba(255,255,255,0.88);pointer-events:none}
+.game-wrap{flex:1;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.05));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.game-canvas{position:absolute;inset:0;pointer-events:none;z-index:6}
+.game-stage{position:relative;width:100%;height:100%;display:block;pointer-events:none}
 
-  /* Safe drop zone */
-  .safe-zone{position:absolute;left:0;right:0;bottom:0;height:var(--safe-zone);display:flex;align-items:center;justify-content:center;pointer-events:none}
-  .zone{width:86%;max-width:820px;height:78px;border-radius:14px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.75);font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:15px;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;transition:border-color 160ms}
+/* floating polaroids / memories */
+.memory{
+  position:absolute;pointer-events:auto;user-select:none;touch-action:manipulation;
+  width:120px;height:120px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow:0 18px 48px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 220ms ease,opacity 220ms;
+}
+.memory img{width:100%;height:100%;object-fit:cover}
+.mem-label{position:absolute;left:8px;bottom:6px;font-size:11px;color:rgba(255,255,255,0.9)}
 
-  /* Footer controls */
-  .controls{display:flex;gap:10px;padding:14px;border-top:1px solid rgba(255,255,255,0.02);align-items:center;justify-content:flex-end}
+/* drop safe area (bottom right) */
+.drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;z-index:7;font-family:var(--mono)}
 
-  /* Gallery modal */
-  .gallery-modal{position:fixed;inset:0;background:rgba(2,2,3,0.88);display:none;align-items:center;justify-content:center;z-index:40;padding:20px}
-  .gallery-modal.active{display:flex}
-  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;max-width:1200px;width:100%;max-height:84vh;overflow:auto;padding:8px}
-  .gthumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 16px 48px rgba(0,0,0,0.6);cursor:pointer;position:relative;transform-origin:center;transition:transform 200ms,opacity 200ms}
-  .gthumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .gcaption{position:absolute;left:8px;bottom:8px;color:white;font-size:12px;text-shadow:0 6px 18px rgba(0,0,0,0.6)}
+/* cinematic overlay effects */
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.25) 100%);z-index:8}
 
-  /* Viewer (full-screen) */
-  .viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
-  .viewer.active{display:flex}
-  .viewer .content{max-width:920px;width:94%;max-height:92vh;border-radius:14px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.8);background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18))}
-  .viewer img,.viewer video{width:100%;height:auto;display:block}
-  .viewer .meta{padding:12px;color:var(--muted);font-size:13px}
-  .viewer-close{position:fixed;right:18px;top:18px;z-index:70;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,0.45);cursor:pointer;color:white}
+/* gallery modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:90;padding:20px}
+.modal.active{display:flex}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;max-width:1100px;width:100%;max-height:84vh;overflow:auto;padding:8px}
+.thumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 18px 48px rgba(0,0,0,0.6);cursor:pointer;position:relative;transition:transform .22s}
+.thumb img{width:100%;height:120px;object-fit:cover;display:block}
+.thumb .cap{padding:8px;color:var(--muted);font-size:13px}
 
-  /* small responsive */
-  @media (max-width:720px){
-    .memory{width:92px;height:92px}
-    .mem-label{font-size:10px}
-    .gcaption{font-size:11px}
-    .gallery-grid{gap:10px}
-  }
+/* viewer */
+.viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);z-index:100;padding:20px}
+.viewer.active{display:flex}
+.viewer .card{max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18));box-shadow:0 40px 140px rgba(0,0,0,0.8)}
+.viewer img,.viewer video{width:100%;height:auto;display:block}
+.viewer .meta{padding:12px;color:var(--muted);font-size:13px}
+
+/* final cinematic scene (full right area) */
+.final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:12px;text-align:left;opacity:0;pointer-events:none}
+.final-wrap.active{opacity:1;pointer-events:auto;transition:opacity .5s ease}
+.final-title{font-size:22px;font-weight:700}
+.final-text p{margin:12px 0;line-height:1.45}
+
+/* small */
+.hidden{display:none!important}
+@media(max-width:980px){ .frame{grid-template-columns:1fr} .left{order:2} .right{order:1} .frame{height:88vh} }
 </style>
 </head>
 <body>
 
-  <!-- Background video (10s heart loop) -->
-  <video id="bg-video" autoplay muted loop playsinline>
-    <source src="bg.mp4" type="video/mp4">
-    <!-- if no video, fallback background color will show -->
-  </video>
+<!-- Background video - name must be bg.mp4 and be in same folder as index.html -->
+<video id="bg-video" autoplay muted loop playsinline>
+  <source src="bg.mp4" type="video/mp4">
+  <!-- fallback color if video fails -->
+</video>
 
-  <div class="overlay" aria-hidden="true"></div>
+<div class="overlay" aria-hidden="true"></div>
 
-  <div class="app" role="application" aria-label="Подарок - интерактив">
-    <div class="container" role="region" aria-label="Игра и галерея">
+<!-- cinematic top/bottom bars (grow on entry) -->
+<div class="letterbox-top" id="lbTop"></div>
+<div class="letterbox-bottom" id="lbBottom"></div>
 
-      <!-- header / HUD -->
-      <div class="header">
+<div class="app" role="application" aria-label="Интерактивный подарок">
+  <div class="frame" role="region">
+
+    <!-- LEFT: Chat / intro -->
+    <div class="left" aria-label="Сообщения">
+      <div class="header-left">
+        <div class="avatar">P</div>
         <div>
-          <div class="title">Маленький подарок</div>
-          <div class="hint">Тапни на карточки или перетащи в зону внизу — чтобы сохранить моменты</div>
-        </div>
-
-        <div class="hud" role="status" aria-live="polite">
-          <div class="score-box">Сохранено: <strong id="score">0</strong>/<span id="need">0</span></div>
-          <div class="saved-bar" id="savedBar" aria-hidden="false"></div>
-          <button class="btn secondary" id="openGalleryBtn" title="Открыть галерею">Галерея</button>
+          <div style="font-weight:700">Небольшой подарок</div>
+          <div class="hint" style="font-size:13px;color:var(--muted)">Лёгкий интерактив — не бойся нажать</div>
         </div>
       </div>
 
-      <!-- main game area -->
-      <div class="game-area" id="gameAreaWrap">
-        <div id="gameArea" aria-hidden="false"></div>
+      <div class="chat-area" id="chatArea" aria-live="polite">
+        <!-- messages will be inserted here -->
+      </div>
 
-        <!-- safe zone -->
-        <div class="safe-zone" aria-hidden="false">
-          <div class="zone" id="dropZone">Перетащи сюда — сохранить</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="typing hidden" id="typing">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
         </div>
+        <button id="startBtn" class="btn">Начать</button>
       </div>
-
-      <!-- controls footer -->
-      <div class="controls">
-        <button class="btn" id="resetSaved">Очистить сохранённое</button>
-      </div>
-
     </div>
-  </div>
 
-  <!-- Gallery modal -->
-  <div class="gallery-modal" id="galleryModal" aria-hidden="true">
-    <div class="gallery-grid" id="galleryGrid" role="list"></div>
-    <button class="btn" id="closeGallery" style="position:fixed;left:18px;top:18px">Закрыть</button>
-  </div>
+    <!-- RIGHT: Game + final -->
+    <div class="right" aria-label="Игровая сцена">
+      <div class="topbar">
+        <div>
+          <div class="title">Спаси моменты</div>
+          <div class="hint">Тапни на карточку или перетащи в зону справа внизу</div>
+        </div>
+        <div class="hud">
+          <div class="score" id="scoreBox">0</div>
+          <div class="saved-row" id="savedBar"></div>
+          <button class="btn secondary" id="openGallery">Галерея</button>
+        </div>
+      </div>
 
-  <!-- Viewer -->
-  <div class="viewer" id="viewer" aria-hidden="true">
-    <div class="viewer-close" id="viewerClose">✕</div>
-    <div class="content" id="viewerContent" role="dialog" aria-modal="true"></div>
+      <div class="game-wrap" id="gameWrap">
+        <div class="game-canvas" id="gameArea"></div>
+        <div class="drop-area" id="dropArea">Перетащи сюда — сохранить</div>
+
+        <!-- final cinematic text + video area (overlay) -->
+        <div class="final-wrap" id="finalWrap" aria-hidden="true">
+          <div class="final-title" id="finalTitle">Ничто не исчезнет полностью</div>
+          <div class="final-text" id="finalText"></div>
+          <video id="finalVideo" class="hidden" playsinline controls style="width:100%;max-height:360px;border-radius:12px;overflow:hidden"></video>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="btn" id="replayBtn">Просмотреть снова</button>
+            <button class="btn secondary" id="writeBtn">Написать</button>
+          </div>
+        </div>
+
+        <div class="vignette" aria-hidden="true"></div>
+      </div>
+
+      <div class="controls" style="display:flex;justify-content:flex-end;gap:10px;padding-top:10px">
+        <button class="btn secondary" id="clearSaved">Очистить</button>
+      </div>
+    </div>
+
   </div>
+</div>
+
+<!-- Gallery modal -->
+<div class="modal" id="galleryModal" aria-hidden="true">
+  <div class="grid" id="galleryGrid"></div>
+  <button class="btn" id="closeGallery" style="position:fixed;left:18px;top:18px">Закрыть</button>
+</div>
+
+<!-- Viewer -->
+<div class="viewer" id="viewer" aria-hidden="true">
+  <div class="viewer-close" id="closeViewer" style="position:fixed;right:18px;top:18px;background:rgba(0,0,0,0.45);padding:10px;border-radius:12px;cursor:pointer">✕</div>
+  <div class="card" id="viewerCard" style="max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden"></div>
+</div>
 
 <script>
-/* ================= CONFIG — поменяй пути/названия файлов при необходимости ================ */
+/* ================== CONFIG (файлы/подписи) ==================
+ - Помести свои изображения рядом с index.html под этими именами
+ - bg.mp4 уже используется выше (10s loop). final.mp4 — финальное видео.
+===========================================================*/
 const CONFIG = {
-  memories: [
+  memories:[
     {type:'img', content:'mem1.jpg', label:'Первое фото'},
     {type:'img', content:'mem2.jpg', label:'Наш смех'},
     {type:'img', content:'mem3.jpg', label:'Кофе вместе'},
     {type:'img', content:'pet1.jpg', label:'Котик'},
     {type:'text', content:'Первое "привет"', label:'Привет'}
   ],
-  requiredToWin: 5,
-  spawnInterval: 700,
-  fallSpeed: 26,
-  tickInterval: 30,
-  maxSimultaneous: 4,
-  finalMedia: 'final.mp4',
-  storageKey: 'gift_saved_v1'
+  requiredToWin:5,
+  spawnInterval:700,
+  fallSpeed:28,
+  tickInterval:28,
+  maxSimultaneous:4,
+  finalMedia:'final.mp4',
+  storageKey:'gift_v2_saved'
 };
-/* ========================================================================================= */
+/* ============================================================== */
 
+/* Helpful selectors */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
+
+/* UI references */
+const chatArea = $('#chatArea');
+const startBtn = $('#startBtn');
+const typing = $('#typing');
+const gameArea = $('#gameArea');
+const dropArea = $('#dropArea');
+const savedBar = $('#savedBar');
+const scoreBox = $('#scoreBox');
+const openGalleryBtn = $('#openGallery');
+const galleryModal = $('#galleryModal');
+const galleryGrid = $('#galleryGrid');
+const closeGalleryBtn = $('#closeGallery');
+const viewer = $('#viewer');
+const viewerCard = $('#viewerCard');
+const closeViewer = $('#closeViewer');
+const finalWrap = $('#finalWrap');
+const finalTextEl = $('#finalText');
+const finalVideo = $('#finalVideo');
+const replayBtn = $('#replayBtn');
+const writeBtn = $('#writeBtn');
+const lbTop = $('#lbTop'), lbBottom = $('#lbBottom');
+const clearSaved = $('#clearSaved');
 
 /* State */
 let activeMemories = [];
 let spawnTimer = null;
 let score = 0;
 let savedMemories = loadSaved(CONFIG.storageKey) || [];
-const gameArea = $('#gameArea');
+let chatIndex = 0;
+let storySequence = []; // messages sequence
 
-/* UI elements */
-const scoreEl = $('#score');
-const needEl = $('#need');
-const savedBar = $('#savedBar');
-const dropZone = $('#dropZone');
-const galleryModal = $('#galleryModal');
-const galleryGrid = $('#galleryGrid');
-const openGalleryBtn = $('#openGalleryBtn');
-const closeGalleryBtn = $('#closeGallery');
-const viewer = $('#viewer');
-const viewerContent = $('#viewerContent');
-const viewerClose = $('#viewerClose');
-const resetSavedBtn = $('#resetSaved');
+/* final user text paragraphs (can be changed) */
+const FINAL_PARAGRAPHS = [
+`Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
+`Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
+`Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
+`Если бы я был слепым — ты была бы моим зрением.
+Если бы я был глухим — ты была бы моим слухом.
+Если бы я был немым — ты была бы моим голосом.`,
+`Если бы не было тебя — не было бы меня.
 
-/* Initialize UI values */
-needEl.textContent = CONFIG.requiredToWin;
-scoreEl.textContent = score;
-renderSavedBar();
+Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
+];
 
-/* Boot: start spawning automatically (no intro required for this task) */
-startGame();
+/* Pre-built chat script (assistant-generated lines). You can edit these later. */
+storySequence = [
+  {who:'them', text:'Привет. Я немного нервничаю.'},
+  {who:'them', text:'Решил сделать маленький подарок — это займет минуту.'},
+  {who:'them', text:'Тут лёгкая игра: нужно сохранить пару моментов.'},
+  {who:'them', text:'Не бойся — просто тапай или перетаскивай.'},
+  {who:'them', text:'Готов? Нажми «Начать».'}
+];
 
-/* ========== Game: spawn, move, save logic ========== */
+/* ---------- Helper utilities ---------- */
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function rand(min,max){ return min + Math.random()*(max-min) }
 
-function startGame(){
-  score = 0;
-  updateScore();
-  // preload images
-  CONFIG.memories.forEach(m => { if(m.type === 'img') { const im = new Image(); im.src = m.content; }});
+/* ---------- Cinematic entry: animate letterbox ---------- */
+(async function cinematicEntry(){
+  // animate letterbox bars (grow to 72px then hide)
+  lbTop.style.height = '0px';
+  lbBottom.style.height = '0px';
+  // fast grow
+  requestAnimationFrame(()=>{ lbTop.style.transition='height 480ms ease'; lbBottom.style.transition='height 480ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
+  await sleep(900);
+  // show chat intro lines
+  await runChatIntro();
+  // shrink bars
+  lbTop.style.height='0px'; lbBottom.style.height='0px';
+})();
+
+/* ---------- Chat: render messages sequentially ---------- */
+async function runChatIntro(){
+  chatArea.innerHTML = '';
+  for(let i=0;i<storySequence.length;i++){
+    const m = storySequence[i];
+    await showTyping();
+    await appendMessage(m.who, m.text);
+    await sleep(420);
+  }
+  typing.classList.add('hidden');
+  startBtn.classList.remove('hidden');
+}
+
+/* show typing animation for ~700-1000ms */
+async function showTyping(){
+  typing.classList.remove('hidden');
+  await sleep(800 + Math.random()*400);
+  typing.classList.add('hidden');
+}
+
+/* append message to chat */
+async function appendMessage(who, text){
+  const el = document.createElement('div');
+  el.className = 'msg ' + (who === 'me' ? 'me' : 'them');
+  el.innerHTML = `<div>${text}</div>`;
+  chatArea.appendChild(el);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  // small pop-in
+  el.style.opacity = 0; el.style.transform = 'translateY(8px)';
+  requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; });
+  return;
+}
+
+/* ---------- Start button behaviour (start game) ---------- */
+startBtn.addEventListener('click', async ()=>{
+  startBtn.disabled = true;
+  startBtn.textContent = 'Идёт...';
+  await sleep(180);
+  startBtn.classList.add('hidden');
+  // add a "me" message acknowledging
+  await appendMessage('me', 'Окей — начинаем!');
+  initGame();
+});
+
+/* ---------- Game system: spawn falling memory cards ---------- */
+function initGame(){
+  score = 0; updateScore();
+  // preload
+  CONFIG.memories.forEach(m => { if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
   spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
-  spawnMemory(); // immediate
+  spawnMemory();
+  renderSavedBar();
 }
 
-function stopGame(){
-  clearInterval(spawnTimer);
-  spawnTimer = null;
-  // remove active nodes
-  activeMemories.forEach(m => { try{ m.el.remove(); }catch(e){} });
-  activeMemories = [];
-}
-
+/* spawn one memory node */
 function spawnMemory(){
   const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
   const node = document.createElement('div');
   node.className = 'memory';
   node.style.left = (6 + Math.random()*88) + '%';
-  node.style.top = '-160px';
-  node.setAttribute('role','button');
-  node.setAttribute('tabindex','0');
-
+  node.style.top = '-140px';
+  node.tabIndex = 0;
+  // add content
   if(template.type === 'img'){
-    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || 'воспоминание';
+    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || '';
     node.appendChild(img);
-    const lab = document.createElement('div'); lab.className = 'mem-label'; lab.innerText = template.label || ''; node.appendChild(lab);
+    const lab = document.createElement('div'); lab.className = 'mem-label'; lab.innerText = template.label || '';
+    node.appendChild(lab);
   } else {
-    const t = document.createElement('div'); t.textContent = template.content; t.style.padding='6px 8px';
-    node.appendChild(t);
+    const t = document.createElement('div'); t.style.padding='8px'; t.innerText = template.content; node.appendChild(t);
   }
-
   gameArea.appendChild(node);
-  const memObj = { el: node, y: -160, id: Date.now() + Math.random(), meta: template };
+  const memObj = {el:node, y:-140, id:Date.now()+Math.random(), meta:template};
   activeMemories.push(memObj);
 
   // click to save
-  node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(memObj); });
-
-  // keyboard accessibility
-  node.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); saveMemory(memObj); }});
+  node.addEventListener('click',(e)=>{ e.stopPropagation(); saveMemory(memObj); });
 
   // pointer drag support
-  let dragging = false, startY = 0, startX = 0, offsetY = 0, offsetX = 0;
+  let dragging=false, startX=0, startY=0, offsetY=0, offsetX=0;
   node.addEventListener('pointerdown', (ev)=>{
     ev.preventDefault();
     node.setPointerCapture(ev.pointerId);
     dragging = true;
-    startY = ev.clientY; startX = ev.clientX;
-    offsetY = memObj.y; offsetX = parseFloat(node.style.left);
+    startX = ev.clientX; startY = ev.clientY;
+    offsetX = parseFloat(node.style.left);
+    offsetY = memObj.y;
     node.style.transition = 'transform 0s';
   });
   node.addEventListener('pointermove', (ev)=>{
     if(!dragging) return;
-    const dy = ev.clientY - startY;
     const dx = ev.clientX - startX;
+    const dy = ev.clientY - startY;
     memObj.y = offsetY + dy;
-    node.style.top = (memObj.y) + 'px';
+    node.style.top = memObj.y + 'px';
     node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%';
-    // highlight drop zone
-    const zoneRect = dropZone.getBoundingClientRect();
+    const zoneRect = document.getElementById('dropArea').getBoundingClientRect();
     const nRect = node.getBoundingClientRect();
-    if(intersectRect(zoneRect, nRect)) dropZone.style.borderColor = 'rgba(255,255,255,0.55)';
-    else dropZone.style.borderColor = 'rgba(255,255,255,0.06)';
+    if(intersect(zoneRect, nRect)){ $('#dropArea').style.borderColor = 'rgba(255,255,255,0.7)'; }
+    else { $('#dropArea').style.borderColor = 'rgba(255,255,255,0.06)'; }
   });
   node.addEventListener('pointerup', (ev)=>{
     dragging = false;
     node.releasePointerCapture && node.releasePointerCapture(ev.pointerId);
     node.style.transition = '';
-    const zoneRect = dropZone.getBoundingClientRect();
+    const zoneRect = document.getElementById('dropArea').getBoundingClientRect();
     const nRect = node.getBoundingClientRect();
-    dropZone.style.borderColor = 'rgba(255,255,255,0.06)';
-    if(intersectRect(zoneRect, nRect)) saveMemory(memObj);
+    $('#dropArea').style.borderColor = 'rgba(255,255,255,0.06)';
+    if(intersect(zoneRect, nRect)) saveMemory(memObj);
   });
 }
 
-/* falling ticker */
+/* falling motion */
 const ticker = setInterval(()=>{
-  activeMemories.forEach(m => {
+  activeMemories.forEach(m=>{
     m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5));
     if(m.el) m.el.style.top = (m.y) + 'px';
   });
-  // remove if off-screen
   activeMemories = activeMemories.filter(m=>{
     if(!m.el) return false;
-    const rect = m.el.getBoundingClientRect();
-    if(rect.top > window.innerHeight + 120){
+    const r = m.el.getBoundingClientRect();
+    if(r.top > window.innerHeight + 120){
       try{ m.el.remove(); }catch(e){}
       return false;
     }
@@ -318,93 +430,145 @@ const ticker = setInterval(()=>{
   });
 }, CONFIG.tickInterval);
 
-function intersectRect(r1,r2){
+/* helper intersection */
+function intersect(r1,r2){
   return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
 }
 
-/* Save memory: animate into savedBar and persist */
+/* save memory -> animate into saved bar & persist */
 function saveMemory(memObj){
   if(!memObj || !memObj.el) return;
   // animate out
-  memObj.el.style.transition = 'transform 360ms ease, opacity 360ms ease';
+  memObj.el.style.transition = 'transform 320ms ease, opacity 320ms ease';
   memObj.el.style.transform = 'scale(0.78) translateY(20px)';
   memObj.el.style.opacity = '0';
-  memObj.el.style.filter = 'grayscale(20%) blur(0.6px)';
   activeMemories = activeMemories.filter(m => m.id !== memObj.id);
-  setTimeout(()=>{ try{ memObj.el.remove(); }catch(e){} }, 380);
+  setTimeout(()=>{ try{ memObj.el.remove(); }catch(e){} }, 360);
 
-  // Add to saved list
-  const item = {
-    type: memObj.meta.type,
-    content: memObj.meta.content,
-    label: memObj.meta.label || '',
-    when: Date.now()
-  };
+  // push to saved list
+  const item = { type: memObj.meta.type, content: memObj.meta.content, label: memObj.meta.label || '', when: Date.now() };
   savedMemories.push(item);
   persistSaved(CONFIG.storageKey, savedMemories);
   renderSavedBar();
 
-  // small visual feedback
-  flashScreen();
+  // small visual & sound feedback
+  flash();
   score++;
   updateScore();
 
-  // when win threshold reached -> glitch then final (optional)
+  // if reached required number show final cinematic
   if(score >= CONFIG.requiredToWin){
-    // stop spawning & proceed with "glitch" -> (we'll just show gallery automatically)
-    stopGame();
-    setTimeout(()=>{ openGallery(); }, 800);
+    triggerFinalSequence();
   }
 }
 
-function flashScreen(){
-  const el = document.body;
-  el.style.transition = 'box-shadow 220ms ease';
-  el.style.boxShadow = 'inset 0 0 160px rgba(255,120,150,0.04)';
-  setTimeout(()=>{ el.style.boxShadow = ''; }, 260);
+function flash(){
+  document.body.style.transition = 'box-shadow 220ms ease';
+  document.body.style.boxShadow = 'inset 0 0 160px rgba(255,120,150,0.04)';
+  setTimeout(()=>{ document.body.style.boxShadow = ''; }, 260);
 }
+function updateScore(){ scoreBox.textContent = score; }
 
-/* UI updates */
-function updateScore(){ scoreEl.textContent = score; }
+/* render saved thumbs in HUD */
 function renderSavedBar(){
-  savedBar.innerHTML = ''; // last up to 6
-  const last = savedMemories.slice(-6);
-  last.forEach(item=>{
-    const t = document.createElement('div'); t.className = 'saved-thumb';
+  savedBar.innerHTML = '';
+  const list = savedMemories.slice(-6);
+  list.forEach(item=>{
+    const el = document.createElement('div'); el.className = 'saved-thumb';
     if(item.type === 'img'){
       const img = document.createElement('img'); img.src = item.content; img.alt = item.label || '';
-      t.appendChild(img);
+      el.appendChild(img);
     } else {
-      t.textContent = item.label || item.content;
+      el.textContent = item.label || item.content;
+      el.style.padding = '6px';
+      el.style.fontSize = '12px';
     }
-    t.addEventListener('click', ()=> openViewer(item));
-    savedBar.appendChild(t);
+    el.addEventListener('click', ()=> openViewer(item));
+    savedBar.appendChild(el);
   });
 }
 
-/* Persist/load helpers */
+/* persist/load */
 function persistSaved(key, arr){ try{ localStorage.setItem(key, JSON.stringify(arr)); }catch(e){} }
 function loadSaved(key){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : []; }catch(e){ return []; } }
 
-/*========== Gallery modal & viewer ==========*/
+/* ---------- Final cinematic sequence ---------- */
+async function triggerFinalSequence(){
+  // stop spawning
+  stopSpawning();
+  // small pause
+  await sleep(500);
+  // gentle letterbox in
+  lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease';
+  lbTop.style.height='72px'; lbBottom.style.height='72px';
+  await sleep(700);
+  // show cinematic lead text in chat then reveal final
+  await appendMessage('them', 'Некоторые вещи невозможно удалить.');
+  await sleep(600);
+  await appendMessage('them', 'Особенно чувства.');
+  await sleep(900);
+  // reveal final wrap (text + video)
+  showFinal();
+  // retract letterbox slowly
+  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 1200);
+}
+
+function stopSpawning(){ clearInterval(spawnTimer); spawnTimer = null; }
+
+/* show final: place video and paragraphs */
+function showFinal(){
+  finalWrap.classList.add('active');
+  finalTextEl.innerHTML = '';
+  // set final text paragraphs gradually
+  (async ()=>{
+    for(let p of FINAL_PARAGRAPHS){
+      const el = document.createElement('p'); el.innerHTML = p.replace(/\n/g,'<br>');
+      el.style.opacity = 0; el.style.transform = 'translateY(8px)';
+      finalTextEl.appendChild(el);
+      requestAnimationFrame(()=>{ el.style.transition='opacity 420ms ease, transform 420ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; });
+      await sleep(900);
+    }
+  })();
+
+  // if final video exists, attach and play
+  if(CONFIG.finalMedia && CONFIG.finalMedia.toLowerCase().endsWith('.mp4')){
+    finalVideo.src = CONFIG.finalMedia;
+    finalVideo.classList.remove('hidden');
+    finalVideo.play().catch(()=>{ /* autoplay blocked; user can press play */ });
+  }
+}
+
+/* replay final */
+replayBtn.addEventListener('click', ()=>{ if(finalVideo.src){ finalVideo.currentTime = 0; finalVideo.play().catch(()=>{}); } });
+
+/* write button -> mailto if configured */
+writeBtn.addEventListener('click', ()=>{
+  const mail = prompt('Введите e-mail (или оставьте пустым, если не хотите)');
+  if(mail && mail.trim().length){
+    window.location.href = 'mailto:' + encodeURIComponent(mail) + '?subject=Привет';
+  } else {
+    alert('Можешь написать позже :)');
+  }
+});
+
+/* ---------- Gallery modal & viewer ---------- */
 openGalleryBtn.addEventListener('click', openGallery);
 closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); });
 function openGallery(){
   galleryGrid.innerHTML = '';
   if(savedMemories.length === 0){
-    const n = document.createElement('div'); n.className = 'muted'; n.style.padding = '20px'; n.textContent = 'Здесь пока пусто — сохрани пару моментов в игре.';
+    const n = document.createElement('div'); n.className='muted'; n.style.padding='20px'; n.textContent = 'Пока ничего — сначала сохрани пару моментов.';
     galleryGrid.appendChild(n);
   } else {
-    const list = savedMemories.slice().reverse();
-    list.forEach(item=>{
-      const g = document.createElement('div'); g.className = 'gthumb';
+    savedMemories.slice().reverse().forEach(item=>{
+      const g = document.createElement('div'); g.className = 'thumb';
       if(item.type === 'img'){
         const img = document.createElement('img'); img.src = item.content; g.appendChild(img);
       } else {
-        const t = document.createElement('div'); t.style.padding='14px'; t.textContent = item.label || item.content; g.appendChild(t);
+        const t = document.createElement('div'); t.style.padding='12px'; t.textContent = item.label || item.content; g.appendChild(t);
       }
-      const c = document.createElement('div'); c.className = 'gcaption'; c.textContent = item.label || new Date(item.when).toLocaleString();
-      g.appendChild(c);
+      const caption = document.createElement('div'); caption.className='cap'; caption.textContent = item.label || new Date(item.when).toLocaleString();
+      g.appendChild(caption);
       g.addEventListener('click', ()=> openViewer(item));
       galleryGrid.appendChild(g);
     });
@@ -413,73 +577,47 @@ function openGallery(){
   galleryModal.setAttribute('aria-hidden','false');
 }
 
-/* Viewer: show single item with animation */
+/* viewer open */
 function openViewer(item){
-  viewerContent.innerHTML = '';
-  const wrapper = document.createElement('div'); wrapper.style.padding = '0';
-  const box = document.createElement('div'); box.className = 'content';
+  // clear
+  viewerCard.innerHTML = '';
+  const wrap = document.createElement('div'); wrap.style.padding = '0';
+  const content = document.createElement('div'); content.className = 'content';
   if(item.type === 'img'){
-    const img = document.createElement('img'); img.src = item.content; img.alt = item.label || ''; box.appendChild(img);
+    const img = document.createElement('img'); img.src = item.content; img.alt = item.label || '';
+    content.appendChild(img);
   } else {
-    const t = document.createElement('div'); t.style.padding = '20px'; t.style.color = 'white'; t.textContent = item.content; box.appendChild(t);
+    const t = document.createElement('div'); t.style.padding = '18px'; t.style.color='white'; t.textContent = item.content; content.appendChild(t);
   }
   const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = (item.label ? item.label + ' — ' : '') + new Date(item.when).toLocaleString();
-  box.appendChild(meta);
-  wrapper.appendChild(box);
-  viewerContent.appendChild(wrapper);
-
-  // animate open
+  wrap.appendChild(content); wrap.appendChild(meta);
+  viewerCard.appendChild(wrap);
   viewer.classList.add('active');
   viewer.setAttribute('aria-hidden','false');
-  wrapper.style.transform = 'scale(0.96)';
-  wrapper.style.opacity = '0';
-  requestAnimationFrame(()=>{ wrapper.style.transition = 'transform 420ms ease, opacity 420ms ease'; wrapper.style.transform = 'scale(1)'; wrapper.style.opacity = '1'; });
-
-  // ensure gallery modal closed
+  // animate
+  wrap.style.transform = 'scale(.96)'; wrap.style.opacity = '0';
+  requestAnimationFrame(()=>{ wrap.style.transition='transform 420ms ease, opacity 420ms ease'; wrap.style.transform='scale(1)'; wrap.style.opacity='1'; });
+  // close gallery if open
   galleryModal.classList.remove('active');
   galleryModal.setAttribute('aria-hidden','true');
 }
-viewerClose.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerContent.innerHTML = ''; });
+closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML = ''; });
 
-/* Reset saved */
-resetSavedBtn.addEventListener('click', ()=>{
+/* ---------- Clear saved ---------- */
+clearSaved.addEventListener('click', ()=>{
   if(!confirm('Очистить все сохранённые моменты?')) return;
-  savedMemories = []; persistSaved(CONFIG.storageKey, savedMemories); renderSavedBar(); alert('Сохранённые моменты удалены.');
+  savedMemories = []; persistSaved(CONFIG.storageKey, savedMemories); renderSavedBar(); alert('Готово — сохранения удалены.');
 });
 
-/* Utility: triple tap easter (attach if needed) */
-function attachTripleTap(node, cb){
-  let taps = [];
-  node.addEventListener('pointerdown', (e)=>{
-    const now = Date.now();
-    taps.push(now);
-    taps = taps.filter(t => now - t < 1200);
-    if(taps.length >= 3){ taps = []; try{ cb(); }catch(e){} }
-  });
-}
-
-/* Prevent overscroll when dragging on mobile */
+/* ---------- Helpers ---------- */
+// Prevent overscroll on mobile while dragging
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
 
-/* On load: render saved UI */
-(function init(){
+// Auto render savedBar
+(function initUI(){
   renderSavedBar();
-  // if there are saved items, show count in HUD (score remains current session)
-  // You can optionally prefill score with savedMemories.length
 })();
 
-/* expose openViewer for saved thumbnails events (from savedBar) */
-function openViewerFromSavedIndex(idx){
-  if(savedMemories[idx]) openViewer(savedMemories[idx]);
-}
-
-/* Accessibility: keyboard close viewer with ESC */
-document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ if(viewer.classList.contains('active')){ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerContent.innerHTML=''; } if(galleryModal.classList.contains('active')){ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); } } });
-
-/* Clean up on unload: persist */
-window.addEventListener('beforeunload', ()=>{ persistSaved(CONFIG.storageKey, savedMemories); });
-
-/* End of script */
 </script>
 </body>
 </html>
