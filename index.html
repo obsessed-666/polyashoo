@@ -3,522 +3,483 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Небольшой подарок</title>
-<meta name="description" content="Интерактивный подарочный сайт — мини-игра, глюк, финал" />
+<title>Подарок — наши моменты</title>
+
 <style>
-:root{
-  --bg:#040307; --fg:#f6f6f6; --muted:rgba(255,255,255,0.12);
-  --accent:#ff6b8f; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-  --safe-zone:94px;
-  --transition-fast: 260ms cubic-bezier(.2,.9,.2,1);
-  --transition-slow: 520ms cubic-bezier(.2,.9,.2,1);
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
-.scene{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;overflow:hidden;transition:opacity 280ms ease}
-.scene.active{display:flex;opacity:1}
-.card{max-width:980px;width:100%;text-align:center;padding:24px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 20px 60px rgba(0,0,0,0.6)}
-h1{margin:0 0 8px;font-size:30px}
-p{margin:0 0 10px;line-height:1.45;color:var(--fg)}
-.btn{display:inline-block;padding:12px 18px;border-radius:12px;border:none;background:var(--fg);color:var(--bg);font-weight:700;cursor:pointer;margin-top:12px}
-.muted{color:var(--muted);font-size:13px}
+  :root{
+    --bg:#050307;
+    --fg:#f6f6f6;
+    --muted:rgba(255,255,255,0.14);
+    --accent:#ff6b8f;
+    --safe-zone:94px;
+    --ui-radius:12px;
+    --shadow: 0 18px 60px rgba(0,0,0,0.6);
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  a{color:inherit}
 
-/* background layers (parallax & light) */
-.bg-layer{
-  position:fixed;inset:0;pointer-events:none;mix-blend-mode:screen;
-}
-.bg-spot{
-  position:absolute;border-radius:50%;filter:blur(80px);opacity:0.16;transform:translate3d(0,0,0);
-}
-.bg-spot.pink{background:radial-gradient(circle at 30% 30%, rgba(255,110,140,0.9), transparent 20%);}
-.bg-spot.blue{background:radial-gradient(circle at 80% 80%, rgba(0,200,255,0.9), transparent 18%);}
+  /* Background video */
+  #bg-video{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:0;
+  }
+  /* dark overlay for readability */
+  .overlay{
+    position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,3,0.35), rgba(2,2,3,0.6));z-index:1;
+  }
 
-/* BOOT */
-#bootText{font-family:var(--mono);text-align:left;white-space:pre-wrap;min-height:74px;font-size:15px;color:var(--fg)}
+  /* Page shell */
+  .app{
+    position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:20px;
+  }
 
-/* ALIVE */
-.ai-line{font-family:var(--mono);font-size:18px;min-height:56px}
+  /* Center card (holds game) */
+  .container{
+    width:100%;max-width:1000px;height:78vh;max-height:760px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;
+    display:flex;flex-direction:column;
+  }
 
-/* GAME */
-#scene3{background:linear-gradient(180deg, rgba(3,3,5,0.85), rgba(2,2,3,1))}
-#gameArea{position:absolute;inset:0;pointer-events:none;will-change:transform}
-.memory{
-  position:absolute;pointer-events:auto;user-select:none;touch-action:manipulation;
-  display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  box-shadow:0 18px 40px rgba(0,0,0,0.6);color:var(--fg);font-size:16px;will-change:top,left,transform,filter;
-  transition: transform 220ms ease, filter 200ms ease;
-}
-.memory img{max-width:92px;max-height:92px;border-radius:10px;display:block;object-fit:cover}
-#hud{position:fixed;left:12px;top:12px;background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:12px;font-family:var(--mono);font-size:14px}
-#safeZone{position:fixed;left:0;right:0;bottom:0;height:calc(var(--safe-zone));display:flex;align-items:center;justify-content:center;pointer-events:none}
-.zone{width:86%;max-width:820px;height:78px;border-radius:14px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.78);font-family:var(--mono);font-size:15px;border:1px dashed rgba(255,255,255,0.06);pointer-events:none}
+  /* Header (title + hint) */
+  .header{
+    padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.02);display:flex;align-items:center;gap:12px;justify-content:space-between;
+  }
+  .title{
+    font-size:18px;font-weight:700;
+  }
+  .hint{color:var(--muted);font-size:13px}
 
-/* small label overlay */
-.mem-label{position:absolute;bottom:8px;left:8px;font-size:11px;color:rgba(255,255,255,0.85);pointer-events:none}
+  /* HUD: score + saved thumbs + gallery button */
+  .hud{display:flex;align-items:center;gap:12px}
+  .score-box{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:10px;font-size:14px}
+  .saved-bar{display:flex;gap:8px;align-items:center}
+  .saved-thumb{width:44px;height:44px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.14);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transform-origin:center;transition:transform 160ms}
+  .saved-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .saved-thumb:active{transform:scale(0.96)}
+  .btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:#081;cursor:pointer;font-weight:700}
+  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;color:var(--fg)}
 
-/* GLITCH (canvas overlay + css split) */
-.glitch-canvas{position:fixed;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0.0;transition:opacity 220ms}
-.glitch-active-canvas{opacity:1}
-.glitch-text{position:relative;font-family:var(--mono);font-size:26px}
-.glitch-block{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  /* Game area */
+  .game-area{position:relative;flex:1;display:block;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));overflow:hidden}
+  #gameArea{position:absolute;inset:0;pointer-events:none} /* falling items container */
 
-/* FINAL */
-#finalCard{max-width:880px;background:linear-gradient(180deg, rgba(0,0,0,0.36), rgba(0,0,0,0.56));padding:20px;border-radius:14px}
-#finalVideo{width:100%;max-height:480px;border-radius:12px;display:block}
-#finalImg{width:100%;max-height:480px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:block}
-.heart{font-size:56px;display:inline-block;animation:beat 1100ms infinite}
-@keyframes beat{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+  /* falling memory card */
+  .memory{
+    position:absolute;pointer-events:auto;user-select:none;touch-action:manipulation;
+    display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    box-shadow:0 16px 46px rgba(0,0,0,0.55);color:var(--fg);font-size:15px;will-change:top,left,transform,filter,opacity;transition:transform 220ms ease,filter 200ms;
+    width:120px;height:120px;
+  }
+  .memory img{max-width:100%;max-height:100%;border-radius:10px;object-fit:cover;display:block}
+  .mem-label{position:absolute;bottom:8px;left:8px;font-size:11px;color:rgba(255,255,255,0.88);pointer-events:none}
 
-/* transitions & small helpers */
-.fade-in{animation:fadeIn 420ms ease both}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.hidden{display:none!important}
-.small{font-size:13px}
-@media (max-width:640px){h1{font-size:22px}.memory img{max-width:70px;max-height:70px}.zone{font-size:13px;height:68px}}
+  /* Safe drop zone */
+  .safe-zone{position:absolute;left:0;right:0;bottom:0;height:var(--safe-zone);display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .zone{width:86%;max-width:820px;height:78px;border-radius:14px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.75);font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:15px;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;transition:border-color 160ms}
+
+  /* Footer controls */
+  .controls{display:flex;gap:10px;padding:14px;border-top:1px solid rgba(255,255,255,0.02);align-items:center;justify-content:flex-end}
+
+  /* Gallery modal */
+  .gallery-modal{position:fixed;inset:0;background:rgba(2,2,3,0.88);display:none;align-items:center;justify-content:center;z-index:40;padding:20px}
+  .gallery-modal.active{display:flex}
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;max-width:1200px;width:100%;max-height:84vh;overflow:auto;padding:8px}
+  .gthumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 16px 48px rgba(0,0,0,0.6);cursor:pointer;position:relative;transform-origin:center;transition:transform 200ms,opacity 200ms}
+  .gthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .gcaption{position:absolute;left:8px;bottom:8px;color:white;font-size:12px;text-shadow:0 6px 18px rgba(0,0,0,0.6)}
+
+  /* Viewer (full-screen) */
+  .viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+  .viewer.active{display:flex}
+  .viewer .content{max-width:920px;width:94%;max-height:92vh;border-radius:14px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.8);background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18))}
+  .viewer img,.viewer video{width:100%;height:auto;display:block}
+  .viewer .meta{padding:12px;color:var(--muted);font-size:13px}
+  .viewer-close{position:fixed;right:18px;top:18px;z-index:70;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,0.45);cursor:pointer;color:white}
+
+  /* small responsive */
+  @media (max-width:720px){
+    .memory{width:92px;height:92px}
+    .mem-label{font-size:10px}
+    .gcaption{font-size:11px}
+    .gallery-grid{gap:10px}
+  }
 </style>
 </head>
 <body>
 
-<!-- PARALLAX / LIGHT LAYERS -->
-<div class="bg-layer" id="bgLayer" aria-hidden="true">
-  <div class="bg-spot pink" id="spotPink" style="width:900px;height:900px;left:-120px;top:-60px;opacity:0.12"></div>
-  <div class="bg-spot blue" id="spotBlue" style="width:700px;height:700px;right:-140px;bottom:-100px;opacity:0.09"></div>
-</div>
+  <!-- Background video (10s heart loop) -->
+  <video id="bg-video" autoplay muted loop playsinline>
+    <source src="bg.mp4" type="video/mp4">
+    <!-- if no video, fallback background color will show -->
+  </video>
 
-<!-- Canvas for glitch horizontal slices -->
-<canvas id="glitchCanvas" class="glitch-canvas" width="200" height="200" aria-hidden="true"></canvas>
+  <div class="overlay" aria-hidden="true"></div>
 
-<!-- SCENE 1: BOOT -->
-<section id="scene1" class="scene active" aria-hidden="false">
-  <div class="card" role="region" aria-label="Загрузка">
-    <div id="bootText" aria-live="polite"></div>
-    <div style="text-align:center">
-      <button id="enterBtn" class="btn hidden" aria-hidden="true">Продолжить</button>
+  <div class="app" role="application" aria-label="Подарок - интерактив">
+    <div class="container" role="region" aria-label="Игра и галерея">
+
+      <!-- header / HUD -->
+      <div class="header">
+        <div>
+          <div class="title">Маленький подарок</div>
+          <div class="hint">Тапни на карточки или перетащи в зону внизу — чтобы сохранить моменты</div>
+        </div>
+
+        <div class="hud" role="status" aria-live="polite">
+          <div class="score-box">Сохранено: <strong id="score">0</strong>/<span id="need">0</span></div>
+          <div class="saved-bar" id="savedBar" aria-hidden="false"></div>
+          <button class="btn secondary" id="openGalleryBtn" title="Открыть галерею">Галерея</button>
+        </div>
+      </div>
+
+      <!-- main game area -->
+      <div class="game-area" id="gameAreaWrap">
+        <div id="gameArea" aria-hidden="false"></div>
+
+        <!-- safe zone -->
+        <div class="safe-zone" aria-hidden="false">
+          <div class="zone" id="dropZone">Перетащи сюда — сохранить</div>
+        </div>
+      </div>
+
+      <!-- controls footer -->
+      <div class="controls">
+        <button class="btn" id="resetSaved">Очистить сохранённое</button>
+      </div>
+
     </div>
-    <div class="muted small" style="margin-top:10px">Подсказка: можно тапать по картинкам или перетаскивать их в нижнюю зону.</div>
   </div>
-</section>
 
-<!-- SCENE 2: ALIVE -->
-<section id="scene2" class="scene" aria-hidden="true">
-  <div class="card" role="region" aria-label="Сообщение">
-    <div class="ai-line" id="aiText" aria-live="polite"></div>
-    <button id="saveBtn" class="btn hidden" aria-hidden="true">Попробовать сохранить</button>
-    <div class="muted small" style="margin-top:10px">Ничего страшного — лёгкая игра, чтобы немного разрядить момент.</div>
+  <!-- Gallery modal -->
+  <div class="gallery-modal" id="galleryModal" aria-hidden="true">
+    <div class="gallery-grid" id="galleryGrid" role="list"></div>
+    <button class="btn" id="closeGallery" style="position:fixed;left:18px;top:18px">Закрыть</button>
   </div>
-</section>
 
-<!-- SCENE 3: GAME -->
-<section id="scene3" class="scene" aria-hidden="true">
-  <div id="gameArea" aria-hidden="false"></div>
-  <div id="hud" role="status">Сохранено: <span id="score">0</span></div>
-  <div id="safeZone" aria-hidden="false"><div class="zone" id="dropZone">Перетащи сюда — сохранить</div></div>
-</section>
-
-<!-- SCENE 4: GLITCH -->
-<section id="scene4" class="scene" aria-hidden="true">
-  <div class="card glitch-block">
-    <div class="glitch-text" id="glitchText" data-text="ОШИБКА — КОРРУПЦИЯ">ОШИБКА — КОРРУПЦИЯ</div>
-    <div class="muted small" style="margin-top:10px">Система слегка потерялась...</div>
+  <!-- Viewer -->
+  <div class="viewer" id="viewer" aria-hidden="true">
+    <div class="viewer-close" id="viewerClose">✕</div>
+    <div class="content" id="viewerContent" role="dialog" aria-modal="true"></div>
   </div>
-</section>
-
-<!-- SCENE 5: FINAL -->
-<section id="scene5" class="scene" aria-hidden="true">
-  <div id="finalCard" class="card" role="region" aria-label="Финал">
-    <video id="finalVideo" class="hidden" playsinline controls></video>
-    <img id="finalImg" class="hidden" alt="Финал" />
-    <h1 id="finalTitle">Ничто не исчезнет полностью</h1>
-    <div id="finalText" style="text-align:left;margin-top:12px;"></div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px">
-      <button id="replayBtn" class="btn">Посмотреть снова</button>
-      <button id="writeBtn" class="btn">Написать ему</button>
-      <button id="noteBtn" class="btn">Оставить заметку</button>
-    </div>
-
-    <div id="noteResult" class="muted small" style="margin-top:12px"></div>
-    <div class="muted small" style="margin-top:10px">Чтобы заменить видео — положи файл <code>final.mp4</code> в корень репозитория.</div>
-  </div>
-</section>
-
-<!-- Optional sounds (place in repo if available) -->
-<audio id="music" src="music.mp3" preload="auto"></audio>
-<audio id="clickSound" src="click.mp3" preload="auto"></audio>
-<audio id="whisper" src="whisper.mp3" preload="auto"></audio>
 
 <script>
-/* ================= CONFIG =================
- * Если хочешь поменять имена файлов — меняй их только здесь.
- */
+/* ================= CONFIG — поменяй пути/названия файлов при необходимости ================ */
 const CONFIG = {
   memories: [
-    {type:'img', content:'mem1.jpg', label:'Поля — улыбка'},
+    {type:'img', content:'mem1.jpg', label:'Первое фото'},
     {type:'img', content:'mem2.jpg', label:'Наш смех'},
     {type:'img', content:'mem3.jpg', label:'Кофе вместе'},
-    {type:'img', content:'pet1.jpg', label:'Котик Бублик'},   // pet easter egg target
-    {type:'img', content:'pet2.jpg', label:'Собачка Пух'},     // optional
+    {type:'img', content:'pet1.jpg', label:'Котик'},
     {type:'text', content:'Первое "привет"', label:'Привет'}
   ],
   requiredToWin: 5,
   spawnInterval: 700,
-  fallSpeed: 28,
+  fallSpeed: 26,
   tickInterval: 30,
   maxSimultaneous: 4,
-  finalMedia: 'final.mp4',         // final.mp4 in repo; fallbacks: final.jpg
-  contactMail: 'your@email.com'    // replace if want mailto
+  finalMedia: 'final.mp4',
+  storageKey: 'gift_saved_v1'
 };
-/* ========================================= */
-
-/* === Final message (as provided by you) === */
-const FINAL_PARAGRAPHS = [
-`Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
-`Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
-`Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
-`Если бы я был слепым — ты была бы моим зрением.
-Если бы я был глухим — ты была бы моим слухом.
-Если бы я был немым — ты была бы моим голосом.`,
-`Если бы не было тебя — не было бы меня.
-
-Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
-];
-/* ========================================= */
+/* ========================================================================================= */
 
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
-const scene = id => {
-  $$('section.scene').forEach(s=>{ s.classList.remove('active'); s.setAttribute('aria-hidden','true'); });
-  const el = document.getElementById(id);
-  if(el){ el.classList.add('active'); el.setAttribute('aria-hidden','false'); const btn = el.querySelector('button, [tabindex]'); if(btn) btn.focus({preventScroll:true}); }
-};
 
-/* ---------------- Audio (WebAudio crossfade) ---------------- */
-let audioCtx=null, musicEl=null, musicSource=null, musicGain=null, audioInitialized=false;
-function initAudioOnce(){
-  if(audioInitialized) return;
-  audioInitialized = true;
-  try{
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    musicEl = document.getElementById('music');
-    if(musicEl && audioCtx){
-      musicSource = audioCtx.createMediaElementSource(musicEl);
-      musicGain = audioCtx.createGain();
-      musicGain.gain.value = 0.0;
-      musicSource.connect(musicGain).connect(audioCtx.destination);
-    }
-  }catch(e){
-    console.warn('Audio init failed', e);
-  }
-}
-function fadeGainTo(target, time=1.0){
-  if(!musicGain || !audioCtx) return;
-  const now = audioCtx.currentTime;
-  musicGain.gain.cancelScheduledValues(now);
-  musicGain.gain.setValueAtTime(musicGain.gain.value, now);
-  musicGain.gain.linearRampToValueAtTime(target, now + time);
-}
-function tryPlayMusic(){
-  if(!musicEl) return;
-  musicEl.currentTime = 0;
-  const p = musicEl.play();
-  if(p && p.then){
-    p.then(()=>{ fadeGainTo(1.0, 1.0); }).catch(()=>{});
-  } else {
-    fadeGainTo(1.0, 1.0);
-  }
-}
-function fadeOutAndStop(){
-  if(!musicEl) return;
-  fadeGainTo(0.0, 0.9);
-  setTimeout(()=>{ try{ musicEl.pause(); }catch(e){} }, 1000);
-}
+/* State */
+let activeMemories = [];
+let spawnTimer = null;
+let score = 0;
+let savedMemories = loadSaved(CONFIG.storageKey) || [];
+const gameArea = $('#gameArea');
 
-/* ---------------- Parallax / light movement ---------------- */
-const spotPink = document.getElementById('spotPink'), spotBlue = document.getElementById('spotBlue'), bgLayer = document.getElementById('bgLayer');
-function onPointer(e){
-  const x = (e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth/2) - window.innerWidth/2;
-  const y = (e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight/2) - window.innerHeight/2;
-  const px = x / (window.innerWidth/2);
-  const py = y / (window.innerHeight/2);
-  // move spots mildly
-  if(spotPink) spotPink.style.transform = `translate3d(${px*20}px, ${py*18}px, 0)`;
-  if(spotBlue) spotBlue.style.transform = `translate3d(${px*-14}px, ${py*-10}px, 0)`;
-  // subtle gameArea parallax
-  const ga = document.getElementById('gameArea');
-  if(ga) ga.style.transform = `translate3d(${px*6}px, ${py*3}px, 0)`;
-}
-window.addEventListener('pointermove', onPointer);
-window.addEventListener('touchmove', onPointer, {passive:true});
+/* UI elements */
+const scoreEl = $('#score');
+const needEl = $('#need');
+const savedBar = $('#savedBar');
+const dropZone = $('#dropZone');
+const galleryModal = $('#galleryModal');
+const galleryGrid = $('#galleryGrid');
+const openGalleryBtn = $('#openGalleryBtn');
+const closeGalleryBtn = $('#closeGallery');
+const viewer = $('#viewer');
+const viewerContent = $('#viewerContent');
+const viewerClose = $('#viewerClose');
+const resetSavedBtn = $('#resetSaved');
 
-/* ---------------- Boot sequence (typed text) ---------------- */
-const bootText = $('#bootText'), enterBtn = $('#enterBtn');
-async function typeText(el, text, speed=26){
-  el.innerText = '';
-  return new Promise(res=>{
-    let i=0;
-    (function step(){
-      if(i<text.length){ el.innerText += text[i++]; setTimeout(step, speed + Math.random()*10); } else res();
-    })();
-  });
-}
-async function bootSequence(){
-  await typeText(bootText, 'Привет.\nИнициализация небольшого подарка...\n');
-  await sleep(420);
-  await typeText(bootText, '\nНичего сложного — просто маленькая игра.\n');
-  await sleep(540);
-  enterBtn.classList.remove('hidden'); enterBtn.setAttribute('aria-hidden','false');
-}
-enterBtn.addEventListener('click', ()=>{
-  initAudioOnce();
-  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
-  scene('scene2');
-  startAlive();
-});
+/* Initialize UI values */
+needEl.textContent = CONFIG.requiredToWin;
+scoreEl.textContent = score;
+renderSavedBar();
 
-/* ---------------- ALIVE scene 'site is alive' ---------------- */
-const aiText = $('#aiText'), saveBtn = $('#saveBtn');
-async function startAlive(){
-  aiText.innerText = '';
-  await typeText(aiText, "Привет. Я немного нервничаю, но решил сделать это.");
-  await sleep(500);
-  await typeText(aiText, "\n\nТут лёгкая игра — чтобы немного разрядить момент.");
-  await sleep(500);
-  await typeText(aiText, "\n\nПоможешь сохранить пару фрагментов?");
-  await sleep(450);
-  saveBtn.classList.remove('hidden'); saveBtn.setAttribute('aria-hidden','false');
-}
-saveBtn.addEventListener('click', ()=>{
-  initAudioOnce();
-  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
-  scene('scene3');
-  startGame();
-  tryPlayMusic();
-});
+/* Boot: start spawning automatically (no intro required for this task) */
+startGame();
 
-/* ---------------- GAME logic ---------------- */
-const gameArea = $('#gameArea'), scoreEl = $('#score'), dropZone = $('#dropZone');
-let score = 0, spawnTimer = null, memPool = [], activeMemories = [], gameRunning=false;
+/* ========== Game: spawn, move, save logic ========== */
 
 function startGame(){
-  score = 0; activeMemories = []; memPool = CONFIG.memories.slice();
-  scoreEl.innerText = score; gameRunning = true;
-  memPool.forEach(m=>{ if(m.type==='img'){ new Image().src = m.content; } });
+  score = 0;
+  updateScore();
+  // preload images
+  CONFIG.memories.forEach(m => { if(m.type === 'img') { const im = new Image(); im.src = m.content; }});
   spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
-  spawnMemory();
+  spawnMemory(); // immediate
 }
 
-function stopGame(){ gameRunning=false; clearInterval(spawnTimer); activeMemories.forEach(m=>m.el && m.el.remove()); activeMemories=[]; }
+function stopGame(){
+  clearInterval(spawnTimer);
+  spawnTimer = null;
+  // remove active nodes
+  activeMemories.forEach(m => { try{ m.el.remove(); }catch(e){} });
+  activeMemories = [];
+}
 
 function spawnMemory(){
-  if(!gameRunning) return;
-  const t = memPool[Math.floor(Math.random()*memPool.length)];
-  const node = document.createElement('div'); node.className='memory fade-in';
-  node.style.left = (6 + Math.random()*88) + '%'; node.style.top = '-160px';
-  node.setAttribute('role','button'); node.setAttribute('tabindex','0');
-  if(t.type==='img'){ const img=document.createElement('img'); img.src=t.content; img.alt=t.label||'воспоминание'; node.appendChild(img);
-    // label
-    const lab = document.createElement('div'); lab.className='mem-label'; lab.innerText = t.label || ''; node.appendChild(lab);
-  } else { const d=document.createElement('div'); d.innerText=t.content; d.style.padding='8px 10px'; node.appendChild(d); }
-  gameArea.appendChild(node);
-  const memObj={el:node,y:-160,id:Date.now()+Math.random(),meta:t}; activeMemories.push(memObj);
+  const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
+  const node = document.createElement('div');
+  node.className = 'memory';
+  node.style.left = (6 + Math.random()*88) + '%';
+  node.style.top = '-160px';
+  node.setAttribute('role','button');
+  node.setAttribute('tabindex','0');
 
-  node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(memObj); });
-  node.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') saveMemory(memObj); });
-
-  // drag
-  let dragging=false, startY=0, startX=0, offsetY=0, offsetX=0;
-  node.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; startY=ev.clientY; startX=ev.clientX; offsetY=memObj.y; offsetX=parseFloat(node.style.left); node.style.transition='transform 0s'; });
-  node.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const dy=ev.clientY-startY; const dx=ev.clientX-startX; memObj.y = offsetY + dy; node.style.top = memObj.y + 'px'; node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%'; const zr = dropZone.getBoundingClientRect(); const nr = node.getBoundingClientRect(); if(intersectRect(zr,nr)) dropZone.style.borderColor='rgba(255,255,255,0.55)'; else dropZone.style.borderColor='rgba(255,255,255,0.06)'; });
-  node.addEventListener('pointerup', (ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zr=dropZone.getBoundingClientRect(); const nr=node.getBoundingClientRect(); dropZone.style.borderColor='rgba(255,255,255,0.06)'; if(intersectRect(zr,nr)) saveMemory(memObj); });
-
-  // pet easter egg detection: if image and content === pet1, attach triple-tap detection
-  if(t.type==='img' && t.content === 'pet1.jpg'){
-    attachTripleTap(node, ()=>{
-      // reveal sweet easter message
-      showPetEaster();
-    });
+  if(template.type === 'img'){
+    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || 'воспоминание';
+    node.appendChild(img);
+    const lab = document.createElement('div'); lab.className = 'mem-label'; lab.innerText = template.label || ''; node.appendChild(lab);
+  } else {
+    const t = document.createElement('div'); t.textContent = template.content; t.style.padding='6px 8px';
+    node.appendChild(t);
   }
+
+  gameArea.appendChild(node);
+  const memObj = { el: node, y: -160, id: Date.now() + Math.random(), meta: template };
+  activeMemories.push(memObj);
+
+  // click to save
+  node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(memObj); });
+
+  // keyboard accessibility
+  node.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); saveMemory(memObj); }});
+
+  // pointer drag support
+  let dragging = false, startY = 0, startX = 0, offsetY = 0, offsetX = 0;
+  node.addEventListener('pointerdown', (ev)=>{
+    ev.preventDefault();
+    node.setPointerCapture(ev.pointerId);
+    dragging = true;
+    startY = ev.clientY; startX = ev.clientX;
+    offsetY = memObj.y; offsetX = parseFloat(node.style.left);
+    node.style.transition = 'transform 0s';
+  });
+  node.addEventListener('pointermove', (ev)=>{
+    if(!dragging) return;
+    const dy = ev.clientY - startY;
+    const dx = ev.clientX - startX;
+    memObj.y = offsetY + dy;
+    node.style.top = (memObj.y) + 'px';
+    node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%';
+    // highlight drop zone
+    const zoneRect = dropZone.getBoundingClientRect();
+    const nRect = node.getBoundingClientRect();
+    if(intersectRect(zoneRect, nRect)) dropZone.style.borderColor = 'rgba(255,255,255,0.55)';
+    else dropZone.style.borderColor = 'rgba(255,255,255,0.06)';
+  });
+  node.addEventListener('pointerup', (ev)=>{
+    dragging = false;
+    node.releasePointerCapture && node.releasePointerCapture(ev.pointerId);
+    node.style.transition = '';
+    const zoneRect = dropZone.getBoundingClientRect();
+    const nRect = node.getBoundingClientRect();
+    dropZone.style.borderColor = 'rgba(255,255,255,0.06)';
+    if(intersectRect(zoneRect, nRect)) saveMemory(memObj);
+  });
 }
 
-function intersectRect(r1,r2){ return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top); }
+/* falling ticker */
+const ticker = setInterval(()=>{
+  activeMemories.forEach(m => {
+    m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5));
+    if(m.el) m.el.style.top = (m.y) + 'px';
+  });
+  // remove if off-screen
+  activeMemories = activeMemories.filter(m=>{
+    if(!m.el) return false;
+    const rect = m.el.getBoundingClientRect();
+    if(rect.top > window.innerHeight + 120){
+      try{ m.el.remove(); }catch(e){}
+      return false;
+    }
+    return true;
+  });
+}, CONFIG.tickInterval);
 
+function intersectRect(r1,r2){
+  return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
+}
+
+/* Save memory: animate into savedBar and persist */
 function saveMemory(memObj){
   if(!memObj || !memObj.el) return;
-  memObj.el.style.transition='transform 320ms ease, opacity 320ms ease, filter 300ms';
-  memObj.el.style.transform='scale(0.82) translateY(20px) rotate('+((Math.random()*8)-4)+'deg)';
-  memObj.el.style.opacity='0';
-  memObj.el.style.filter='grayscale(30%) blur(0.4px)';
-  activeMemories = activeMemories.filter(m=>m.id!==memObj.id);
-  setTimeout(()=>{ try{ memObj.el.remove(); }catch(e){} },380);
-  score++; scoreEl.innerText = score;
-  // play click
-  const click = document.getElementById('clickSound'); if(click && typeof click.play==='function'){ try{ click.currentTime=0; click.play().catch(()=>{}); }catch(e){} }
-  // small camera flash effect
+  // animate out
+  memObj.el.style.transition = 'transform 360ms ease, opacity 360ms ease';
+  memObj.el.style.transform = 'scale(0.78) translateY(20px)';
+  memObj.el.style.opacity = '0';
+  memObj.el.style.filter = 'grayscale(20%) blur(0.6px)';
+  activeMemories = activeMemories.filter(m => m.id !== memObj.id);
+  setTimeout(()=>{ try{ memObj.el.remove(); }catch(e){} }, 380);
+
+  // Add to saved list
+  const item = {
+    type: memObj.meta.type,
+    content: memObj.meta.content,
+    label: memObj.meta.label || '',
+    when: Date.now()
+  };
+  savedMemories.push(item);
+  persistSaved(CONFIG.storageKey, savedMemories);
+  renderSavedBar();
+
+  // small visual feedback
   flashScreen();
+  score++;
+  updateScore();
+
+  // when win threshold reached -> glitch then final (optional)
   if(score >= CONFIG.requiredToWin){
-    setTimeout(()=>{ stopGame(); fadeOutAndStop(); triggerGlitchSequence(); },520);
+    // stop spawning & proceed with "glitch" -> (we'll just show gallery automatically)
+    stopGame();
+    setTimeout(()=>{ openGallery(); }, 800);
   }
 }
 
 function flashScreen(){
   const el = document.body;
-  el.style.transition = 'box-shadow 180ms ease';
-  el.style.boxShadow = 'inset 0 0 120px rgba(255,150,170,0.06)';
-  setTimeout(()=>{ el.style.boxShadow = ''; }, 240);
+  el.style.transition = 'box-shadow 220ms ease';
+  el.style.boxShadow = 'inset 0 0 160px rgba(255,120,150,0.04)';
+  setTimeout(()=>{ el.style.boxShadow = ''; }, 260);
 }
 
-// ticker: falling motion
-setInterval(()=>{ activeMemories.forEach(m=>{ m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5)); if(m.el) m.el.style.top = (m.y) + 'px'; }); activeMemories = activeMemories.filter(m=>{ if(!m.el) return false; const r=m.el.getBoundingClientRect(); if(r.top > window.innerHeight + 100){ try{ m.el.remove(); }catch(e){}; return false; } return true; }); }, CONFIG.tickInterval);
-
-/* ---------------- Glitch (canvas horizontal slices) ---------------- */
-const canvas = document.getElementById('glitchCanvas');
-const gctx = canvas.getContext('2d');
-function resizeCanvas(){
-  canvas.width = Math.max(320, Math.floor(window.innerWidth));
-  canvas.height = Math.max(240, Math.floor(window.innerHeight));
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-let glitchAnim = null;
-function triggerGlitchSequence(){
-  // show css glitch state
-  document.querySelector('#scene4 .glitch-text').classList.add('fade-in');
-  scene('scene4');
-  // start canvas glitch animation for some time
-  startGlitchCanvas(1400);
-  setTimeout(()=>{ scene('scene4'); setTimeout(()=>{ scene('scene5'); showFinal(); }, 1400); }, 1200);
-}
-
-function startGlitchCanvas(duration = 1500){
-  canvas.classList.add('glitch-active-canvas');
-  const start = performance.now();
-  function frame(now){
-    const t = (now - start);
-    // clear
-    gctx.clearRect(0,0,canvas.width,canvas.height);
-    // draw noise stripes (sample from document rendering snapshot would be best but heavy)
-    // we fake with colored translucent stripes + random displacements
-    const stripes = 10 + Math.floor(Math.random()*8);
-    for(let i=0;i<stripes;i++){
-      const h = Math.random()*(canvas.height*0.12) + 6;
-      const y = Math.random()*(canvas.height - h);
-      const dx = (Math.random()-0.5) * 40 * (1 - (t/duration));
-      gctx.fillStyle = `rgba(${80 + Math.floor(Math.random()*180)},${Math.floor(Math.random()*80)},${200 + Math.floor(Math.random()*55)},${0.06 + Math.random()*0.12})`;
-      gctx.fillRect(Math.max(0,dx), y, canvas.width, h);
-    }
-    if(now - start < duration){
-      glitchAnim = requestAnimationFrame(frame);
+/* UI updates */
+function updateScore(){ scoreEl.textContent = score; }
+function renderSavedBar(){
+  savedBar.innerHTML = ''; // last up to 6
+  const last = savedMemories.slice(-6);
+  last.forEach(item=>{
+    const t = document.createElement('div'); t.className = 'saved-thumb';
+    if(item.type === 'img'){
+      const img = document.createElement('img'); img.src = item.content; img.alt = item.label || '';
+      t.appendChild(img);
     } else {
-      gctx.clearRect(0,0,canvas.width,canvas.height);
-      canvas.classList.remove('glitch-active-canvas');
-      cancelAnimationFrame(glitchAnim);
+      t.textContent = item.label || item.content;
     }
-  }
-  glitchAnim = requestAnimationFrame(frame);
+    t.addEventListener('click', ()=> openViewer(item));
+    savedBar.appendChild(t);
+  });
 }
 
-/* ---------------- Final: staged text reveal + heart ---------------- */
-async function showFinal(){
-  const finalCard = document.getElementById('finalCard');
-  const vv = document.getElementById('finalVideo'), img = document.getElementById('finalImg');
-  const src = CONFIG.finalMedia || '';
-  vv.pause(); vv.src=''; vv.classList.add('hidden'); img.src=''; img.classList.add('hidden');
+/* Persist/load helpers */
+function persistSaved(key, arr){ try{ localStorage.setItem(key, JSON.stringify(arr)); }catch(e){} }
+function loadSaved(key){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : []; }catch(e){ return []; } }
 
-  if(src && src.toLowerCase().endsWith('.mp4')){
-    vv.src = src; vv.classList.remove('hidden'); vv.muted = false;
-    const p = vv.play();
-    if(p && p.then) p.catch(()=>{});
-    // ensure whisper sound near end
-    const whisper = document.getElementById('whisper');
-    if(whisper){
-      vv.addEventListener('timeupdate', function ontime(){
-        if(vv.duration && vv.currentTime > Math.max(0, vv.duration - 3) ){
-          try{ whisper.currentTime = 0; whisper.play().catch(()=>{}); }catch(e){}
-          vv.removeEventListener('timeupdate', ontime);
-        }
-      });
-    }
-  } else if(src && (src.toLowerCase().endsWith('.jpg') || src.toLowerCase().endsWith('.png'))){
-    img.src = src; img.classList.remove('hidden');
+/*========== Gallery modal & viewer ==========*/
+openGalleryBtn.addEventListener('click', openGallery);
+closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); });
+function openGallery(){
+  galleryGrid.innerHTML = '';
+  if(savedMemories.length === 0){
+    const n = document.createElement('div'); n.className = 'muted'; n.style.padding = '20px'; n.textContent = 'Здесь пока пусто — сохрани пару моментов в игре.';
+    galleryGrid.appendChild(n);
+  } else {
+    const list = savedMemories.slice().reverse();
+    list.forEach(item=>{
+      const g = document.createElement('div'); g.className = 'gthumb';
+      if(item.type === 'img'){
+        const img = document.createElement('img'); img.src = item.content; g.appendChild(img);
+      } else {
+        const t = document.createElement('div'); t.style.padding='14px'; t.textContent = item.label || item.content; g.appendChild(t);
+      }
+      const c = document.createElement('div'); c.className = 'gcaption'; c.textContent = item.label || new Date(item.when).toLocaleString();
+      g.appendChild(c);
+      g.addEventListener('click', ()=> openViewer(item));
+      galleryGrid.appendChild(g);
+    });
   }
-  // gradually reveal paragraph by paragraph
-  const ft = document.getElementById('finalText');
-  ft.innerHTML = '';
-  await sleep(700); // small pause after transition
-  for(let i=0;i<FINAL_PARAGRAPHS.length;i++){
-    const p = document.createElement('p');
-    p.innerHTML = FINAL_PARAGRAPHS[i].replace(/\n/g,'<br>');
-    p.style.opacity = 0; p.style.transform = 'translateY(8px)';
-    ft.appendChild(p);
-    // animate in
-    requestAnimationFrame(()=>{ p.style.transition = 'opacity 420ms ease, transform 420ms ease'; p.style.opacity = 1; p.style.transform = 'translateY(0)'; });
-    // play tiny accent
-    const click = document.getElementById('clickSound'); if(click){ try{ click.currentTime = 0; click.play().catch(()=>{}); }catch(e){} }
-    await sleep(900 + (i*120)); // stagger
-  }
-  // show heart pulse
-  const heart = document.createElement('div'); heart.className = 'heart'; heart.innerHTML = '❤';
-  heart.style.display = 'inline-block'; heart.style.marginLeft = '8px';
-  const title = document.getElementById('finalTitle');
-  title.appendChild(heart);
-  // slight flourish
-  title.style.transition = 'transform 420ms ease'; title.style.transform = 'translateY(-6px)';
-  setTimeout(()=>{ title.style.transform = ''; }, 680);
+  galleryModal.classList.add('active');
+  galleryModal.setAttribute('aria-hidden','false');
 }
 
-/* ---------------- Pet easter message ---------------- */
-function showPetEaster(){
-  const el = document.createElement('div');
-  el.style.position='fixed';
-  el.style.left='50%';
-  el.style.top='12%';
-  el.style.transform='translateX(-50%)';
-  el.style.zIndex='9999';
-  el.style.background='linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))';
-  el.style.border='1px solid rgba(255,255,255,0.06)';
-  el.style.padding='14px 18px';
-  el.style.borderRadius='12px';
-  el.style.boxShadow='0 12px 34px rgba(0,0,0,0.5)';
-  el.innerHTML = '<strong>Псс...</strong> Я думаю, ваш питомец — настоящий герой этой истории :)';
-  document.body.appendChild(el);
-  setTimeout(()=>{ el.style.transition='opacity 400ms ease'; el.style.opacity=0; setTimeout(()=>el.remove(),420); }, 2200);
-}
+/* Viewer: show single item with animation */
+function openViewer(item){
+  viewerContent.innerHTML = '';
+  const wrapper = document.createElement('div'); wrapper.style.padding = '0';
+  const box = document.createElement('div'); box.className = 'content';
+  if(item.type === 'img'){
+    const img = document.createElement('img'); img.src = item.content; img.alt = item.label || ''; box.appendChild(img);
+  } else {
+    const t = document.createElement('div'); t.style.padding = '20px'; t.style.color = 'white'; t.textContent = item.content; box.appendChild(t);
+  }
+  const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = (item.label ? item.label + ' — ' : '') + new Date(item.when).toLocaleString();
+  box.appendChild(meta);
+  wrapper.appendChild(box);
+  viewerContent.appendChild(wrapper);
 
-/* ---------------- triple-tap helper ---------------- */
+  // animate open
+  viewer.classList.add('active');
+  viewer.setAttribute('aria-hidden','false');
+  wrapper.style.transform = 'scale(0.96)';
+  wrapper.style.opacity = '0';
+  requestAnimationFrame(()=>{ wrapper.style.transition = 'transform 420ms ease, opacity 420ms ease'; wrapper.style.transform = 'scale(1)'; wrapper.style.opacity = '1'; });
+
+  // ensure gallery modal closed
+  galleryModal.classList.remove('active');
+  galleryModal.setAttribute('aria-hidden','true');
+}
+viewerClose.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerContent.innerHTML = ''; });
+
+/* Reset saved */
+resetSavedBtn.addEventListener('click', ()=>{
+  if(!confirm('Очистить все сохранённые моменты?')) return;
+  savedMemories = []; persistSaved(CONFIG.storageKey, savedMemories); renderSavedBar(); alert('Сохранённые моменты удалены.');
+});
+
+/* Utility: triple tap easter (attach if needed) */
 function attachTripleTap(node, cb){
   let taps = [];
   node.addEventListener('pointerdown', (e)=>{
     const now = Date.now();
     taps.push(now);
-    taps = taps.filter(t => now - t < 1200); // keep taps within 1.2s window
-    if(taps.length >= 3){
-      taps = [];
-      try{ cb(); }catch(e){}
-    }
+    taps = taps.filter(t => now - t < 1200);
+    if(taps.length >= 3){ taps = []; try{ cb(); }catch(e){} }
   });
 }
 
-/* ---------------- small UI helpers (note, mail, replay) ---------------- */
-$('#replayBtn').addEventListener('click', ()=>{ $$('#gameArea .memory').forEach(n=>n.remove()); score=0; $('#score').innerText=0; const v=document.getElementById('finalVideo'); if(v){ v.pause(); v.src=''; v.classList.add('hidden'); } const i=document.getElementById('finalImg'); if(i){ i.src=''; i.classList.add('hidden'); } scene('scene1'); $('#enterBtn').classList.add('hidden'); $('#enterBtn').setAttribute('aria-hidden','true'); bootSequence(); });
-
-$('#writeBtn').addEventListener('click', ()=>{ const mail = (CONFIG.contactMail && CONFIG.contactMail !== 'your@email.com') ? CONFIG.contactMail : ''; if(!mail){ alert('Чтобы "Написать" работало — укажи свой e-mail в CONFIG.contactMail в index.html'); return; } window.location.href = 'mailto:' + mail + '?subject=Привет'; });
-
-$('#noteBtn').addEventListener('click', ()=>{ const note = prompt('Напиши короткую заметку (сохранится только на этом устройстве):','Привет :)'); if(note && note.trim().length){ try{ localStorage.setItem('gift_note', note); $('#noteResult').innerText = 'Заметка сохранена (только на этом устройстве).'; }catch(e){ $('#noteResult').innerText = 'Ошибка при сохранении заметки.'; } } else { $('#noteResult').innerText = 'Заметка не добавлена.'; } });
-
-/* ---------------- small helpers ---------------- */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-/* start boot */
-bootSequence();
-
-/* autoplay music when scene3 becomes active (if audio inited) */
-const obs = new MutationObserver(()=>{ const s3 = document.getElementById('scene3'); if(s3.classList.contains('active')) tryPlayMusic(); });
-obs.observe(document.body, {attributes:true, subtree:true, attributeFilter:['class']});
-
-/* prevent overscroll while dragging */
+/* Prevent overscroll when dragging on mobile */
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
+
+/* On load: render saved UI */
+(function init(){
+  renderSavedBar();
+  // if there are saved items, show count in HUD (score remains current session)
+  // You can optionally prefill score with savedMemories.length
+})();
+
+/* expose openViewer for saved thumbnails events (from savedBar) */
+function openViewerFromSavedIndex(idx){
+  if(savedMemories[idx]) openViewer(savedMemories[idx]);
+}
+
+/* Accessibility: keyboard close viewer with ESC */
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ if(viewer.classList.contains('active')){ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerContent.innerHTML=''; } if(galleryModal.classList.contains('active')){ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); } } });
+
+/* Clean up on unload: persist */
+window.addEventListener('beforeunload', ()=>{ persistSaved(CONFIG.storageKey, savedMemories); });
+
+/* End of script */
 </script>
 </body>
 </html>
