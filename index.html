@@ -4,169 +4,173 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Интернет открыточка Полиночке — фикс</title>
+<title>Интернет открыточка Полиночке</title>
 
-<!-- Подключаем шрифты для красивого прописного/красивого текста -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Great+Vibes&display=swap" rel="stylesheet">
+<!-- Fonts: Playfair Display for romance (readable), Great Vibes only for small flourishes if needed -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#030312; --fg:#f6f6f6; --muted:rgba(255,255,255,0.14);
-  --accent-start:#ff9db5; --accent-end:#ff6b8f;
-  --shadow:0 22px 90px rgba(0,0,0,0.7);
-  --music-target:0.6; --music-fade:2.4s;
+  --bg:#030312; --fg:#ffffff; --muted:rgba(255,255,255,0.16);
+  --accent1:#ff9db5; --accent2:#ff6b8f;
+  --shadow: 0 20px 80px rgba(0,0,0,0.6);
+  --music-target:0.6;
 }
+/* Basics */
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:contain}
-button{font-family:inherit;border:0;cursor:pointer}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);-webkit-text-size-adjust:100%;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+button{font-family:inherit;border:0;background:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
 
-/* --- Background video --- */
-#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:0;-webkit-transform:translateZ(0);will-change:transform;filter:brightness(0.93) saturate(1.02)}
-.overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1;pointer-events:none}
+/* Background video */
+#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:0;will-change:transform}
+.overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.26), rgba(2,2,4,0.64));z-index:1;pointer-events:none}
 
-/* cinematic letterboxes */
-.letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:0;background:#000;z-index:40;pointer-events:none}
-.letterbox-top{top:0} .letterbox-bottom{bottom:0}
+/* Letterbox - only decorative, cleared later */
+.lb{position:fixed;left:0;right:0;height:0;background:#000;z-index:40;pointer-events:none}
+.lb.top{top:0} .lb.bottom{bottom:0}
 
-/* app */
-.app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+/* App shell */
+.app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
 
-/* main frame */
-.frame{width:100%;max-width:1120px;height:82vh;max-height:880px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:all .44s cubic-bezier(.2,.9,.2,1)}
-/* avoid relying on grid collapse alone; hide panel via transform */
-.frame.collapsed .left{transform:translateX(-120%);opacity:0;pointer-events:none}
+/* Frame */
+.frame{width:100%;max-width:1120px;height:86vh;max-height:920px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:all .44s cubic-bezier(.2,.9,.2,1)}
+/* When collapsed, hide left visually via transform+opacity to avoid edge */
+.frame.collapsed .left{transform:translateX(-110%);opacity:0;pointer-events:none}
 
-/* left panel */
-.left{padding:16px;border-right:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));overflow:hidden;transition:transform .44s ease, opacity .44s ease}
+/* Left column */
+.left{padding:16px;border-right:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));transition:transform .44s ease, opacity .44s ease;z-index:12}
 .header-left{display:flex;align-items:center;gap:12px}
-.avatar-wrap{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-start),#6bd0ff);display:flex;align-items:center;justify-content:center;overflow:hidden}
-.avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar-wrap{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),#6bd0ff);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar-wrap img{width:100%;height:100%;object-fit:cover}
 .avatar-fallback{font-weight:700;color:#09090a;font-size:20px;display:flex;align-items:center;justify-content:center;height:100%;width:100%}
 .chat-area{flex:1;overflow:auto;padding-right:6px;-webkit-overflow-scrolling:touch}
-.msg{max-width:86%;padding:10px 12px;border-radius:14px;margin:8px 0;position:relative;line-height:1.35}
+.msg{max-width:86%;padding:10px 12px;border-radius:14px;margin:8px 0;line-height:1.38}
 .msg.me{margin-left:auto;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))}
 .msg.them{margin-right:auto;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
 .typing{height:26px;display:flex;align-items:center;gap:6px;padding-left:6px}
 .dot{width:7px;height:7px;background:rgba(255,255,255,0.14);border-radius:50%;animation:blink 1200ms infinite}
-.dot:nth-child(2){animation-delay:160ms} .dot:nth-child(3){animation-delay:320ms}
 @keyframes blink{0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25}}
 
-/* right area */
-.right{position:relative;padding:16px;display:flex;flex-direction:column;gap:12px}
+/* Right column */
+.right{position:relative;padding:16px;display:flex;flex-direction:column;gap:12px;z-index:13}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+/* Title centered and per-letter float */
 .title-wrap{flex:1;display:flex;align-items:center;justify-content:center}
 .title{
   font-family:'Playfair Display', serif;
-  font-weight:900;
+  font-weight:700;
   font-size:34px;
-  text-transform:uppercase;
-  letter-spacing:1.2px;
-  margin:0;
   line-height:1;
-  background:linear-gradient(90deg,#fff 0%, #ffd6e6 30%, #ffb0d0 60%, #fff 100%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,#ffffff 0%, #ffd6e6 30%, #ffb0d0 60%, #fff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
   background-size:300% 100%;
-  text-shadow:0 8px 30px rgba(0,0,0,0.28);
-  animation:shimmer 6s linear infinite;
+  animation: shimmer 6s linear infinite;
+  text-shadow:0 8px 30px rgba(0,0,0,0.2);
+  letter-spacing:0.6px;
   display:inline-block;
-  will-change:transform;
 }
 @keyframes shimmer{0%{background-position:-120% 0}100%{background-position:220% 0}}
-
-/* per-letter float (title) */
-.title .char{display:inline-block; animation:letterFloat 1.6s ease-in-out infinite; transform-origin:center; }
+.title .char{display:inline-block;animation:letterFloat 1.6s ease-in-out infinite}
 @keyframes letterFloat{0%{transform:translateY(0)}30%{transform:translateY(-6px)}60%{transform:translateY(3px)}100%{transform:translateY(0)}}
 
-/* hud */
+/* HUD */
 .hud{display:flex;align-items:center;gap:10px}
 .score{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px}
 .saved-row{display:flex;gap:8px;align-items:center}
-.saved-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform 160ms}
+.saved-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform 120ms}
 .saved-thumb img{width:100%;height:100%;object-fit:cover}
-.saved-thumb:active{transform:scale(.96)}
-.btn{padding:8px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:white;font-weight:700}
+.btn{padding:8px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;font-weight:700}
 .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--fg);padding:8px 12px}
 
-/* game */
+/* Game area */
 .game-wrap{flex:1;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.game-canvas{position:absolute;inset:0;pointer-events:none;z-index:6}
-.drop-area{position:absolute;right:16px;bottom:16px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:ui-monospace, monospace;z-index:7}
+.game-stage{position:absolute;inset:0;pointer-events:auto;z-index:6;display:block}
+.drop-area{position:absolute;right:16px;bottom:16px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:ui-monospace,monospace;z-index:7}
 
-/* memory cards */
+/* Memory cards (contain image fully) */
 .memory{
   position:absolute;pointer-events:auto;user-select:none;touch-action:none;
   width:120px;height:120px;border-radius:12px;background:rgba(255,255,255,0.02);
   display:flex;align-items:center;justify-content:center;overflow:hidden;
-  box-shadow:0 18px 48px rgba(0,0,0,0.55);
-  transition:transform 220ms ease, opacity 220ms;
+  box-shadow:0 18px 48px rgba(0,0,0,0.55);transition:transform 220ms ease, opacity 220ms;
   padding:8px; will-change:transform, top, left;
 }
-.memory img{width:100%;height:100%;object-fit:contain;border-radius:8px;display:block}
+.memory img{width:100%;height:100%;object-fit:contain;border-radius:8px;}
 
-/* final overlay */
-.final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px;gap:18px;text-align:center;opacity:0;pointer-events:none;z-index:80;transition:opacity .45s ease}
+/* Dimmed game when final overlay active */
+.game-dim{filter:blur(3px) brightness(.6);pointer-events:none;transition:filter .44s ease}
+
+/* Final overlay (separate layer) */
+.final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px;gap:18px;text-align:center;opacity:0;pointer-events:none;z-index:95;transition:opacity .44s ease}
 .final-wrap.active{opacity:1;pointer-events:auto}
+/* Romantic text styling (readable + romantic shimmer) */
 .romantic{
-  font-family:'Great Vibes', 'Playfair Display', serif;
-  font-size:34px;
+  font-family:'Playfair Display', serif;
+  font-weight:700;
+  font-size:32px;
+  line-height:1.25;
   color:#fff;
   max-width:920px;
-  line-height:1.25;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  text-shadow:0 12px 40px rgba(0,0,0,0.6);
-  will-change:transform;
+  letter-spacing:0.6px;
+  text-shadow:0 12px 40px rgba(0,0,0,0.55);
+  background:linear-gradient(90deg,#fff 0%, #ffd6e6 30%, #ffb0d0 60%, #fff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  background-size:300% 100%;
+  animation:shimmerRom 6s linear infinite;
+  text-transform:none; /* keep original casing */
+  display:block;
+  will-change:transform,opacity;
+  transform-origin:center;
 }
-/* animate each letter in romantic as well */
-.romantic .rchar{display:inline-block;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.9,.2,1)}
-.romantic .rchar.visible{opacity:1;transform:translateY(0) scale(1)}
-/* pulsing whole romantic block */
+@keyframes shimmerRom{0%{background-position:-100% 0}100%{background-position:200% 0}}
+/* per-letter reveal for romantic: .rchar */
+.romantic .rchar{display:inline-block;opacity:0;transform:translateY(10px);transition:opacity .5s ease, transform .5s cubic-bezier(.2,.9,.2,1)}
+.romantic .rchar.visible{opacity:1;transform:translateY(0)}
+/* gentle pulse of whole romantic block */
+.romantic.pulse{animation:romanticPulse 4s ease-in-out infinite}
 @keyframes romanticPulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
-.romantic.pulse{animation:romanticPulse 3.6s ease-in-out infinite}
 
-/* SVG heart container */
+/* Heart SVG container */
 .heart-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
-.heart-svg{width:140px;height:140px;cursor:pointer;filter:drop-shadow(0 20px 50px rgba(255,80,120,0.15));transition:transform .18s ease}
+.heart-svg{width:140px;height:140px;cursor:pointer;filter:drop-shadow(0 20px 60px rgba(255,80,120,0.12));transition:transform .18s ease}
 .heart-svg:active{transform:scale(.95)}
 
-/* vignette */
-.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.25) 100%);z-index:8}
-
-/* modal viewer */
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:100;padding:18px}
+/* Viewer / modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:110;padding:18px}
 .modal.active{display:flex}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-width:1100px;width:100%;max-height:84vh;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
-.thumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 18px 48px rgba(0,0,0,0.6);cursor:pointer;position:relative;transition:transform .22s}
-.thumb img{width:100%;height:120px;object-fit:cover;display:block}
+.thumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 18px 48px rgba(0,0,0,0.6);cursor:pointer}
+.thumb img{width:100%;height:120px;object-fit:cover}
 .viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);z-index:120;padding:20px}
 .viewer.active{display:flex}
 .viewer .card{max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18));box-shadow:0 40px 140px rgba(0,0,0,0.8)}
 
-/* responsive */
-@media (max-width:980px){
+/* Responsive (iPhone 13 Pro Max CSS width ~428) */
+@media (max-width:440px){
   .frame{grid-template-columns:1fr}
   .left{order:2}
   .right{order:1}
-  .frame{height:88vh}
-  .drop-area{right:12px;left:12px;width:auto}
   .title{font-size:28px}
-  .romantic{font-size:28px}
-  .memory{width:100px;height:100px}
+  .romantic{font-size:26px}
+  .memory{width:96px;height:96px;padding:6px}
   .heart-svg{width:110px;height:110px}
+  /* reduce spawn pressure on mobile */
+  :root{--mobile:true}
 }
 </style>
 </head>
 <body>
 
-<!-- Background video; keep muted & playsinline for mobile autoplay -->
+<!-- BG video -->
 <video id="bg-video" autoplay muted loop playsinline webkit-playsinline preload="auto">
   <source src="bg.mp4" type="video/mp4">
-  <!-- fallback background color -->
 </video>
 <div class="overlay" aria-hidden="true"></div>
 
-<div class="letterbox-top" id="lbTop"></div>
-<div class="letterbox-bottom" id="lbBottom"></div>
+<div class="lb top" id="lbTop"></div>
+<div class="lb bottom" id="lbBottom"></div>
 
 <div class="app" role="application" aria-label="Интерактивная открытка">
   <div class="frame" id="frame">
@@ -174,8 +178,8 @@ button{font-family:inherit;border:0;cursor:pointer}
     <!-- LEFT -->
     <div class="left" id="leftPane" aria-label="Сообщения">
       <div class="header-left">
-        <div class="avatar-wrap" id="avatarWrap">
-          <img id="avatarImg" src="avatar.jpg" alt="P" onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'"/>
+        <div class="avatar-wrap">
+          <img id="avatarImg" src="avatar.jpg" alt="P" onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'">
           <div id="avatarFallback" class="avatar-fallback" style="display:none">P</div>
         </div>
         <div>
@@ -188,64 +192,62 @@ button{font-family:inherit;border:0;cursor:pointer}
 
       <div style="display:flex;align-items:center;gap:8px">
         <div class="typing hidden" id="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        <button class="btn" id="startBtn">начать</button>
+        <button class="btn" id="startBtn" style="background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff;border-radius:10px;padding:10px 14px">начать</button>
       </div>
     </div>
 
     <!-- RIGHT -->
     <div class="right" id="rightPane" aria-label="Игровая сцена">
       <div class="topbar">
-        <div class="title-wrap">
-          <div id="title" class="title">БОМБЁЖКА МИЛОТОЙ</div>
-        </div>
-
+        <div class="title-wrap"><div id="title" class="title">БОМБЁЖКА МИЛОТОЙ</div></div>
         <div class="hud">
           <div class="score" id="scoreBox">0</div>
-          <div class="saved-row" id="savedBar" aria-hidden="false"></div>
+          <div class="saved-row" id="savedBar"></div>
           <button class="btn secondary" id="openGallery">Галерея</button>
         </div>
       </div>
 
       <div class="game-wrap" id="gameWrap">
-        <div class="game-canvas" id="gameArea"></div>
+        <div class="game-stage" id="gameStage">
+          <!-- falling cards will be appended here -->
+        </div>
+
         <div class="drop-area" id="dropArea">Перетащи сюда — сохранить</div>
 
-        <!-- final overlay: romantic text + heart + finalVideo (hidden until heart click) -->
+        <!-- Final overlay (initially hidden) -->
         <div class="final-wrap" id="finalWrap" aria-hidden="true">
           <div class="romantic" id="romanticText" aria-hidden="true"></div>
 
           <div class="heart-wrap" id="heartContainer" style="display:none">
-            <div class="heart-svg" id="heartSvgWrap" title="Нажми, чтобы увидеть финал">
-              <!-- SVG gradient heart + arrow -->
+            <div class="heart-svg" id="heartSvgWrap" title="Нажми, чтобы продолжить">
+              <!-- SVG heart -->
               <svg viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Сердце">
                 <defs>
-                  <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#ff9db5"/>
-                    <stop offset="50%" stop-color="#ff6b8f"/>
-                    <stop offset="100%" stop-color="#ff4a7a"/>
+                  <linearGradient id="gradHeart" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#ff9db5" />
+                    <stop offset="50%" stop-color="#ff6b8f" />
+                    <stop offset="100%" stop-color="#ff4a7a" />
                   </linearGradient>
-                  <filter id="s1" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#ff6b8f" flood-opacity="0.16"/>
-                  </filter>
+                  <filter id="drop" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#ff6b8f" flood-opacity="0.12"/></filter>
                 </defs>
-                <g filter="url(#s1)">
-                  <path d="M100 170c-30-18-62-42-74-62-12-20-2-46 18-52 16-5 36 2 46 16 10-14 30-21 46-16 20 6 30 32 18 52-12 20-44 44-74 62z" fill="url(#g1)" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+                <g filter="url(#drop)">
+                  <path d="M100 170c-30-18-62-42-74-62-12-20-2-46 18-52 16-5 36 2 46 16 10-14 30-21 46-16 20 6 30 32 18 52-12 20-44 44-74 62z" fill="url(#gradHeart)" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
                 </g>
+                <!-- arrow -->
                 <g transform="translate(-8,-20) rotate(-16 100 100)" opacity="0.95">
                   <rect x="18" y="96" width="160" height="7" rx="3" fill="#cfcfcf" />
                   <polygon points="10,90 18,96 10,102" fill="#cfcfcf"/>
                   <polygon points="188,96 200,92 200,100" fill="#fff2"/>
                 </g>
-                <ellipse cx="74" cy="62" rx="22" ry="10" fill="rgba(255,255,255,0.12)" transform="rotate(-25 74 62)"/>
               </svg>
             </div>
             <div style="margin-top:8px;color:var(--muted);font-size:13px">Нажми на сердце, чтобы продолжить</div>
           </div>
 
-          <video id="finalVideo" class="hidden" playsinline controls style="width:100%;max-height:420px;border-radius:12px;overflow:hidden;display:none"></video>
+          <!-- final video: hidden until heart click -->
+          <video id="finalVideo" playsinline webkit-playsinline controls style="width:100%;max-height:420px;border-radius:12px;overflow:hidden;display:none;background:transparent"></video>
         </div>
 
-        <div class="vignette" aria-hidden="true"></div>
       </div>
 
       <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:10px">
@@ -256,10 +258,10 @@ button{font-family:inherit;border:0;cursor:pointer}
   </div>
 </div>
 
-<!-- gallery modal -->
+<!-- Gallery modal (session only) -->
 <div class="modal" id="galleryModal" aria-hidden="true">
   <div class="grid" id="galleryGrid"></div>
-  <button class="btn" id="closeGallery" style="position:fixed;left:18px;top:18px">Закрыть</button>
+  <button class="btn" id="closeGallery" style="position:fixed;left:16px;top:16px">Закрыть</button>
 </div>
 
 <!-- viewer -->
@@ -268,12 +270,12 @@ button{font-family:inherit;border:0;cursor:pointer}
   <div class="card" id="viewerCard" style="max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden"></div>
 </div>
 
-<!-- audio -->
+<!-- Audio elements -->
 <audio id="music" src="music.mp3" preload="auto" loop></audio>
 <audio id="click" src="click.mp3" preload="auto"></audio>
 
 <script>
-/* ========== CONFIG ========== */
+/* ========== Configuration ========== */
 const CONFIG = {
   memories:[
     {type:'img', content:'mem1.jpg'},
@@ -284,38 +286,39 @@ const CONFIG = {
     {type:'img', content:'pet3.jpg'}
   ],
   requiredToWin:5,
-  spawnInterval:700,
-  fallSpeed:28,
-  tickInterval:28,
-  maxSimultaneous:4,
+  spawnIntervalDesktop:700,
+  spawnIntervalMobile:1000,
+  fallSpeedDesktop:28,
+  fallSpeedMobile:20,
+  maxSimultaneousDesktop:4,
+  maxSimultaneousMobile:2,
   finalMedia:'final.mp4'
 };
-/* ============================ */
+/* ========== Selectors ========== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
 
-/* Short selectors */
-const $ = s=>document.querySelector(s);
-const $$ = s=>Array.from(document.querySelectorAll(s));
-
-/* UI refs */
 const frame = $('#frame'), leftPane = $('#leftPane');
-const startBtn = $('#startBtn'), typing = $('#typing');
-const chatArea = $('#chatArea'), gameArea = $('#gameArea'), dropArea = $('#dropArea');
+const startBtn = $('#startBtn'), typing = $('#typing'), chatArea = $('#chatArea');
+const gameStage = $('#gameStage'), gameWrap = $('#gameWrap'), dropArea = $('#dropArea');
 const savedBar = $('#savedBar'), scoreBox = $('#scoreBox');
+const finalWrap = $('#finalWrap'), romanticText = $('#romanticText'), heartContainer = $('#heartContainer'), heartSvgWrap = $('#heartSvgWrap'), finalVideo = $('#finalVideo');
 const openGalleryBtn = $('#openGallery'), galleryModal = $('#galleryModal'), galleryGrid = $('#galleryGrid'), closeGalleryBtn = $('#closeGallery');
 const viewer = $('#viewer'), viewerCard = $('#viewerCard'), closeViewer = $('#closeViewer');
-const finalWrap = $('#finalWrap'), romanticText = $('#romanticText'), heartContainer = $('#heartContainer'), heartSvgWrap = $('#heartSvgWrap'), finalVideo = $('#finalVideo');
-const lbTop = $('#lbTop'), lbBottom = $('#lbBottom');
 const clearSaved = $('#clearSaved');
+const lbTop = $('#lbTop'), lbBottom = $('#lbBottom');
 
 const musicEl = document.getElementById('music'), clickEl = document.getElementById('click');
 
-let activeMemories = [], spawnTimer = null, score = 0;
-let savedMemories = []; // in-memory for session only
+let activeMemories = [], spawnTimer = null, ticker = null, score = 0;
+let savedMemories = []; // session-only
+let audioCtx=null, musicSource=null, musicGain=null, audioInitialized=false;
 
-/* Audio using WebAudio for soft fades */
-let audioCtx = null, musicSource = null, musicGain = null, audioInitialized = false;
-const MUSIC_TARGET = 0.6, MUSIC_FADE_SEC = 2.4;
-function initAudioOnce(){
+/* detect mobile narrow screens (iPhone 13 Pro Max ~428) */
+const isNarrow = window.matchMedia('(max-width:440px)').matches;
+
+/* audio helpers: WebAudio fade */
+function initAudio(){
   if(audioInitialized) return;
   audioInitialized = true;
   try{
@@ -325,9 +328,9 @@ function initAudioOnce(){
     musicGain.gain.value = 0.0;
     musicSource.connect(musicGain).connect(audioCtx.destination);
     musicEl.loop = true;
-  }catch(e){ console.warn('audio init', e); }
+  }catch(e){ console.warn('audio init error', e); }
 }
-function fadeMusicTo(target, time){
+function fadeMusicTo(target=0.6, time=2.4){
   if(!musicGain || !audioCtx) return;
   const now = audioCtx.currentTime;
   musicGain.gain.cancelScheduledValues(now);
@@ -337,11 +340,11 @@ function fadeMusicTo(target, time){
 function startMusic(){
   if(!musicEl) return;
   try{
-    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+    if(audioCtx && audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
     const p = musicEl.play();
-    if(p && p.then) p.then(()=>{ fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC); }).catch(()=>{});
-    else fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC);
-  }catch(e){ console.warn(e); }
+    if(p && p.then) p.then(()=> fadeMusicTo(0.6,2.4)).catch(()=>{});
+    else fadeMusicTo(0.6,2.4);
+  }catch(e){console.warn(e);}
 }
 function softStopMusic(){
   if(!musicGain || !audioCtx){ try{ musicEl.pause(); }catch(e){}; return; }
@@ -353,11 +356,8 @@ function softStopMusic(){
 }
 function playClick(){ if(clickEl){ try{ clickEl.currentTime=0; clickEl.play().catch(()=>{}); }catch(e){} }}
 
-/* small util */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-/* Chat sequence */
-const storySequence = [
+/* Chat intro */
+const introLines = [
   'приветки поля, я немного стесняюсь',
   'я может и просто бегущая строка - но я вижу как ты необычайно красива сегодня',
   'тут лёгенькая игра, нужно спасти несколько падающих прикольчиков',
@@ -365,284 +365,228 @@ const storySequence = [
   'готова? тык "начать"'
 ];
 
-/* romantic paragraphs (same as user provided) */
-const FINAL_PARAGRAPHS = [
-`Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
-`Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
-`Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
-`Если бы я был слепым — ты была бы моим зрением.<br>Если бы я был глухим — ты была бы моим слухом.<br>Если бы я был немым — ты была бы моим голосом.`,
-`Если бы не было тебя — не было бы меня.<br><br>Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
-];
-
-/* Entry cinematic */
-(async function entry(){
-  lbTop.style.height='0px'; lbBottom.style.height='0px';
-  requestAnimationFrame(()=>{ lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
-  await sleep(680);
-  await runChatIntro();
-  lbTop.style.height='0px'; lbBottom.style.height='0px';
-})();
-
-async function runChatIntro(){
-  chatArea.innerHTML = '';
-  for(const t of storySequence){
+async function runIntro(){
+  chatArea.innerHTML='';
+  for(const line of introLines){
     typing.classList.remove('hidden');
-    await sleep(700 + Math.random()*300);
+    await wait(650 + Math.random()*300);
     typing.classList.add('hidden');
-    appendChat('them', t);
-    await sleep(260);
+    appendChat('them', line);
+    await wait(240);
   }
-  startBtn.classList.remove('hidden');
+  startBtn.disabled=false;
 }
 function appendChat(who, text){
   const el = document.createElement('div'); el.className = 'msg ' + (who==='me' ? 'me' : 'them'); el.innerHTML = `<div>${text}</div>`;
-  chatArea.appendChild(el); chatArea.scrollTop = chatArea.scrollHeight;
-  el.style.opacity=0; el.style.transform='translateY(8px)'; requestAnimationFrame(()=>{ el.style.transition='opacity 360ms, transform 360ms'; el.style.opacity=1; el.style.transform='translateY(0)'; });
+  chatArea.appendChild(el);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  el.style.opacity=0; el.style.transform='translateY(8px)'; requestAnimationFrame(()=>{ el.style.transition='opacity 340ms, transform 340ms'; el.style.opacity=1; el.style.transform='translateY(0)'; });
 }
 
-/* Wrap title letters to animate per-letter float */
-function wrapTitleLetters(){
-  const t = $('#title');
-  const txt = t.textContent.trim();
-  t.innerHTML = '';
+/* Title: wrap letters */
+function wrapTitle(){
+  const title = document.getElementById('title');
+  const txt = title.textContent.trim();
+  title.innerHTML='';
   for(let i=0;i<txt.length;i++){
-    const ch = document.createElement('span');
-    ch.textContent = txt[i];
-    ch.className = 'char';
-    // stagger
-    ch.style.animationDelay = `${(i%10)*0.06}s`;
-    t.appendChild(ch);
+    const s = document.createElement('span');
+    s.className='char';
+    s.textContent = txt[i];
+    s.style.animationDelay = `${(i%12)*0.06}s`;
+    title.appendChild(s);
   }
 }
-wrapTitleLetters();
+wrapTitle();
 
-/* Wrap romantic letters for animated appearance */
-function wrapRomanticTextIntoSpans(str){
-  // create container where each letter gets .rchar
-  const frag = document.createDocumentFragment();
-  for(let i=0;i<str.length;i++){
-    const ch = document.createElement('span');
-    ch.className = 'rchar';
-    ch.textContent = str[i];
-    frag.appendChild(ch);
-  }
-  return frag;
-}
-
-/* Start button */
+/* Start button behavior */
 startBtn.addEventListener('click', async ()=>{
-  initAudioOnce();
-  if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume().catch(()=>{});
+  initAudio();
+  if(audioCtx && audioCtx.state==='suspended') await audioCtx.resume().catch(()=>{});
   startMusic();
 
   startBtn.disabled = true;
-  startBtn.textContent = 'Идёт...';
-  await sleep(140);
-
   appendChat('me','Окей — начинаем!');
-  // Collapse frame visually (hide left panel via transform)
+  // collapse left pane visually (transform), then keep hidden to avoid edges
   frame.classList.add('collapsed');
-  leftPane.style.opacity = '0';
-  leftPane.style.pointerEvents = 'none';
-  // After animation we keep it hidden (no display:none to avoid layout jump)
-  await sleep(520);
+  leftPane.style.opacity='0';
+  leftPane.style.pointerEvents='none';
+  // small delay for smooth transition
+  await wait(420);
+  // start game
   initGame();
 });
 
-/* Game init & spawn */
+/* Game init */
 function initGame(){
-  score = 0; updateScore();
-  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
-  spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
+  score=0; updateScore();
+  // preload images
+  CONFIG.memories.forEach(m=>{ const im = new Image(); im.src = m.content; });
+  const spawnInterval = isNarrow ? CONFIG.spawnIntervalMobile : CONFIG.spawnIntervalDesktop;
+  spawnTimer = setInterval(()=>{ if(activeMemories.length < (isNarrow ? CONFIG.maxSimultaneousMobile : CONFIG.maxSimultaneousDesktop)) spawnMemory(); }, spawnInterval);
+  // ticker: move items down
+  const tInterval = isNarrow ? CONFIG.tickInterval : CONFIG.tickInterval;
+  if(ticker) clearInterval(ticker);
+  ticker = setInterval(()=>{ tickFall(); }, tInterval);
   spawnMemory();
   renderSavedBar();
 }
 
-/* Spawn memory card */
+/* spawn a memory card */
 function spawnMemory(){
   const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
   const node = document.createElement('div'); node.className='memory';
+  // position
   node.style.left = (6 + Math.random()*88) + '%';
-  node.style.top = '-160px';
-  node.tabIndex = 0;
-
-  const img = document.createElement('img'); img.src = template.content; img.alt = '';
+  node.style.top = '-180px';
+  node.tabIndex=0;
+  const img = document.createElement('img'); img.src = template.content; img.alt='';
   node.appendChild(img);
-
-  gameArea.appendChild(node);
-  const mem = {el:node, y:-160, id:Date.now()+Math.random(), meta:template};
+  gameStage.appendChild(node);
+  const mem = {el:node, y:-180, id:Date.now()+Math.random(), meta:template};
   activeMemories.push(mem);
 
   node.addEventListener('click',(e)=>{ e.stopPropagation(); saveMemory(mem); });
   node.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(mem); });
 
-  // drag
+  // drag handling
   let dragging=false, sx=0, sy=0, ox=0, oy=0;
-  node.addEventListener('pointerdown',(ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; sx=ev.clientX; sy=ev.clientY; ox=parseFloat(node.style.left); oy=mem.y; node.style.transition='transform 0s'; });
-  node.addEventListener('pointermove',(ev)=>{ if(!dragging) return; const dx=ev.clientX-sx; const dy=ev.clientY-sy; mem.y = oy + dy; node.style.top = mem.y + 'px'; node.style.left = Math.max(2, Math.min(92, ox + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)) dropArea.style.borderColor='rgba(255,255,255,0.7)'; else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
-  node.addEventListener('pointerup',(ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(mem); });
+  node.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; sx=ev.clientX; sy=ev.clientY; ox=parseFloat(node.style.left); oy=mem.y; node.style.transition='transform 0s'; });
+  node.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const dx=ev.clientX-sx; const dy=ev.clientY-sy; mem.y = oy + dy; node.style.top = mem.y + 'px'; node.style.left = Math.max(2, Math.min(92, ox + (dx / window.innerWidth * 100))) + '%'; const zRect=dropArea.getBoundingClientRect(); const nRect=node.getBoundingClientRect(); if(intersect(zRect,nRect)) dropArea.style.borderColor='rgba(255,255,255,0.72)'; else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
+  node.addEventListener('pointerup', (ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect=dropArea.getBoundingClientRect(); const nRect=node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(mem); });
 
-  // slight rotation for vibe but image contained
   node.style.transform = `rotate(${(Math.random()*6-3)}deg)`;
 }
 
-/* ticker */
-const ticker = setInterval(()=>{
-  activeMemories.forEach(m=>{ m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5)); if(m.el) m.el.style.top = (m.y) + 'px'; });
+/* fall tick */
+function tickFall(){
+  const speed = isNarrow ? CONFIG.fallSpeedMobile : CONFIG.fallSpeedDesktop;
+  activeMemories.forEach(m=>{ m.y += (speed * (0.9 + Math.random()*0.4)); if(m.el) m.el.style.top = (m.y) + 'px'; });
   activeMemories = activeMemories.filter(m=>{
     if(!m.el) return false;
     const r = m.el.getBoundingClientRect();
-    if(r.top > window.innerHeight + 120){ try{ m.el.remove(); }catch(e){}; return false; }
+    if(r.top > window.innerHeight + 140){ try{ m.el.remove(); }catch(e){}; return false; }
     return true;
   });
-}, CONFIG.tickInterval);
+}
 
-function intersect(r1,r2){ return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top); }
+function intersect(a,b){ return !(b.left > a.right || b.right < a.left || b.top > a.bottom || b.bottom < a.top); }
 
 /* save memory */
 function saveMemory(mem){
   if(!mem || !mem.el) return;
   mem.el.style.transition='transform 360ms cubic-bezier(.2,.9,.2,1), opacity 360ms';
-  mem.el.style.transform = 'scale(0.78) translateY(20px)';
-  mem.el.style.opacity = '0';
-  activeMemories = activeMemories.filter(m=>m.id !== mem.id);
-  setTimeout(()=>{ try{ mem.el.remove(); }catch(e){} }, 380);
-
-  const item = {type:mem.meta.type, content:mem.meta.content, when:Date.now()};
-  savedMemories.push(item);
+  mem.el.style.transform='scale(.8) translateY(20px)';
+  mem.el.style.opacity='0';
+  activeMemories = activeMemories.filter(x=>x.id !== mem.id);
+  setTimeout(()=>{ try{ mem.el.remove(); }catch(e){} },380);
+  savedMemories.push({type:mem.meta.type, content:mem.meta.content, when:Date.now()});
   renderSavedBar();
-
-  playClick();
-  flash();
-  score++; updateScore();
-  if(score >= CONFIG.requiredToWin) triggerFinalSequence();
+  playClick(); flash(); score++; updateScore();
+  if(score >= CONFIG.requiredToWin) triggerFinal();
 }
-function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,107,143,0.04)'; setTimeout(()=>{ document.body.style.boxShadow=''; },260); }
+function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,107,143,0.04)'; setTimeout(()=>document.body.style.boxShadow='',260); }
 function updateScore(){ scoreBox.textContent = score; }
 
-/* render saved bar */
+/* render saved thumbnails */
 function renderSavedBar(){
-  savedBar.innerHTML = '';
-  const list = savedMemories.slice(-6);
-  list.forEach(item=>{
-    const el = document.createElement('div'); el.className = 'saved-thumb';
-    const img = document.createElement('img'); img.src = item.content; el.appendChild(img);
-    el.addEventListener('click', ()=> openViewer(item));
+  savedBar.innerHTML=''; const last = savedMemories.slice(-6);
+  last.forEach(it=>{
+    const el = document.createElement('div'); el.className='saved-thumb';
+    const img = document.createElement('img'); img.src = it.content; el.appendChild(img);
+    el.addEventListener('click', ()=> openViewer(it));
     savedBar.appendChild(el);
   });
 }
 
-/* final sequence: show romantic text then heart (music continues). */
-async function triggerFinalSequence(){
-  stopSpawning();
-  await sleep(380);
-  lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease';
+/* Trigger final: dim game, show romantic text (music continues), then heart */
+async function triggerFinal(){
+  // stop spawning and movement gracefully
+  clearInterval(spawnTimer); spawnTimer=null;
+  // dim game visuals
+  gameStage.classList.add('game-dim');
+  // cinematic bars up
   lbTop.style.height='72px'; lbBottom.style.height='72px';
-  await sleep(520);
+  await wait(500);
   appendChat('them','Некоторые вещи невозможно удалить.');
-  await sleep(520);
+  await wait(500);
   appendChat('them','Особенно чувства.');
-  await sleep(720);
+  await wait(500);
 
-  // Reveal romantic overlay with per-letter animated appearance
+  // Show romantic overlay - build per-letter spans for readability
   finalWrap.classList.add('active');
-  romanticText.innerHTML = '';
-  // Use Playfair/GreatVibes uppercase styling via spans
-  // Build a large string of all paragraphs separated by line breaks, but animate paragraph-by-paragraph
-  for(let p of FINAL_PARAGRAPHS){
-    // Create paragraph container
-    const para = document.createElement('div');
-    para.style.margin = '6px 0';
-    // Wrap each letter
-    for(let i=0;i<p.length;i++){
-      const span = document.createElement('span');
-      span.className = 'rchar';
-      span.textContent = p[i];
-      // stagger reveal by small delay (set via dataset and style toggled later)
-      span.style.transitionDelay = `${(i%60)*0.01}s`;
-      para.appendChild(span);
+  romanticText.innerHTML='';
+  for(const paragraph of [
+    "Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях.",
+    "Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку.",
+    "Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.",
+    "Если бы не было тебя — не было бы меня."
+  ]){
+    const p = document.createElement('div');
+    for(let i=0;i<paragraph.length;i++){
+      const ch = document.createElement('span'); ch.className='rchar'; ch.textContent = paragraph[i];
+      ch.style.transitionDelay = `${(i%80)*0.008}s`;
+      p.appendChild(ch);
     }
-    romanticText.appendChild(para);
-    // reveal letters sequentially with slight stagger
-    await sleep(260);
-    Array.from(para.querySelectorAll('.rchar')).forEach((el, idx)=>{
-      setTimeout(()=> el.classList.add('visible'), idx * 12);
-    });
-    // small pause before next paragraph
-    await sleep(500);
+    romanticText.appendChild(p);
+    // reveal letters
+    await wait(200);
+    Array.from(p.querySelectorAll('.rchar')).forEach((el, idx)=> setTimeout(()=>el.classList.add('visible'), idx * 10));
+    await wait(420);
   }
-  // add gentle pulse on romantic block
+  // gentle pulse
   romanticText.classList.add('pulse');
-
-  // show heart after short delay
-  await sleep(440);
-  heartContainer.style.display = 'flex';
+  // show heart
+  await wait(420);
+  heartContainer.style.display='flex';
   // retract letterbox
   setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 900);
 }
-function stopSpawning(){ clearInterval(spawnTimer); spawnTimer=null; }
 
-/* Heart click: soft stop music, show final video */
-heartSvgWrap.addEventListener('click', async ()=>{
+/* Heart click: fade music and show final video element */
+$('#heartSvgWrap').addEventListener('click', async ()=>{
   softStopMusic();
-  heartContainer.style.display = 'none';
-  finalVideo.style.display = 'block';
+  $('#heartContainer').style.display='none';
+  finalVideo.style.display='block';
   finalVideo.src = CONFIG.finalMedia;
-  try{ await finalVideo.play(); }catch(e){ /* user may need to press */ }
+  try{ await finalVideo.play(); }catch(e){ /* user can press */ }
 });
 
-/* gallery and viewer (session-only) */
-openGalleryBtn.addEventListener('click', openGallery);
-closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; });
-function openGallery(){
-  galleryGrid.innerHTML = '';
-  if(savedMemories.length === 0){
-    const n = document.createElement('div'); n.className='muted'; n.style.padding='20px'; n.textContent='Пока пусто — сначала сохрани пару моментов.'; galleryGrid.appendChild(n);
-  } else {
-    savedMemories.slice().reverse().forEach(item=>{
-      const g = document.createElement('div'); g.className='thumb';
-      const img = document.createElement('img'); img.src = item.content; g.appendChild(img);
-      const cap = document.createElement('div'); cap.className='cap'; cap.textContent = new Date(item.when).toLocaleString();
-      g.appendChild(cap);
-      g.addEventListener('click', ()=> openViewer(item));
-      galleryGrid.appendChild(g);
-    });
-  }
-  galleryModal.classList.add('active'); galleryModal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
-}
+/* Gallery / viewer (session only) */
+openGalleryBtn.addEventListener('click', ()=>{
+  galleryGrid.innerHTML='';
+  if(savedMemories.length===0){ const n=document.createElement('div'); n.textContent='Пока пусто — сначала сохрани пару моментов.'; n.style.padding='18px'; galleryGrid.appendChild(n); }
+  else savedMemories.slice().reverse().forEach(it=>{
+    const g = document.createElement('div'); g.className='thumb';
+    const img = document.createElement('img'); img.src = it.content; g.appendChild(img);
+    const cap = document.createElement('div'); cap.className='cap'; cap.textContent = new Date(it.when).toLocaleString(); g.appendChild(cap);
+    g.addEventListener('click', ()=> openViewer(it));
+    galleryGrid.appendChild(g);
+  });
+  galleryModal.classList.add('active'); document.body.style.overflow='hidden';
+});
+closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); document.body.style.overflow=''; });
+
 function openViewer(item){
-  viewerCard.innerHTML = '';
-  const wrap = document.createElement('div'); wrap.style.padding='0';
-  const img = document.createElement('img'); img.src = item.content; img.style.width='100%';
-  wrap.appendChild(img);
-  const meta = document.createElement('div'); meta.className='meta'; meta.textContent = new Date(item.when).toLocaleString();
-  viewerCard.appendChild(wrap); viewerCard.appendChild(meta);
-  viewer.classList.add('active'); viewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+  viewerCard.innerHTML=''; const wrap = document.createElement('div'); const img = document.createElement('img'); img.src=item.content; img.style.width='100%'; wrap.appendChild(img); const meta = document.createElement('div'); meta.className='meta'; meta.textContent = new Date(item.when).toLocaleString(); viewerCard.appendChild(wrap); viewerCard.appendChild(meta); viewer.classList.add('active'); document.body.style.overflow='hidden';
 }
-closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; });
+closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewerCard.innerHTML=''; document.body.style.overflow=''; });
 
-/* clear saved (session only) */
-clearSaved.addEventListener('click', ()=>{ if(!confirm('Очистить все сохранённые моменты?')) return; savedMemories=[]; renderSavedBar(); alert('Готово — сохранения удалены.'); });
+/* Clear saved */
+clearSaved.addEventListener('click', ()=>{ if(!confirm('Очистить все сохранённые моменты?')) return; savedMemories=[]; renderSavedBar(); alert('Удалено'); });
 
-/* stop spawning helper */
-function stopAllTimers(){ try{ clearInterval(spawnTimer); clearInterval(ticker); }catch(e){} }
+/* Small helpers */
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function intersect(a,b){ return !(b.left > a.right || b.right < a.left || b.top > a.bottom || b.bottom < a.top); }
 
-/* small easter for pets (triple tap) */
-function attachTripleTap(node, cb){
-  let taps = [];
-  node.addEventListener('pointerdown', (e)=>{ const now = Date.now(); taps.push(now); taps = taps.filter(t => now - t < 1200); if(taps.length >= 3){ taps=[]; try{ cb(); }catch(e){} }});
-}
-function showPetEaster(){
-  const msg = document.createElement('div'); msg.style.position='fixed'; msg.style.top='14%'; msg.style.left='50%'; msg.style.transform='translateX(-50%)'; msg.style.padding='12px 16px'; msg.style.borderRadius='12px'; msg.style.background='linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))'; msg.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'; msg.style.zIndex='140'; msg.innerHTML = '<strong>Псс…</strong> милый питомец здесь :)'; document.body.appendChild(msg); setTimeout(()=>{ msg.style.transition='opacity 420ms ease'; msg.style.opacity=0; setTimeout(()=>msg.remove(),420); },2000);
-}
-
-/* prevent overscroll while dragging */
+/* Prevent overscroll while dragging */
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
 
-/* init: avatar fallback handling */
-(function initUI(){
+/* Avatar fallback */
+(function init(){
   const av = document.getElementById('avatarImg');
   av.addEventListener('error', ()=>{ av.style.display='none'; document.getElementById('avatarFallback').style.display='flex'; });
+  // run intro
+  runIntro();
 })();
 </script>
 </body>
