@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Подарок — интерактив (v2.1)</title>
+<title>Подарок — интерактив (audio+pets)</title>
 <meta name="description" content="Интерактивный романтический лендинг — чат, игра, галерея, финал" />
 <style>
 :root{
@@ -14,12 +14,11 @@
   --safe-zone:92px;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;touch-action:manipulation}
-a{color:inherit}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;touch-action:manipulation}
 button{font-family:inherit;cursor:pointer}
 
 /* background video + overlay */
-#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.95);-webkit-transform:translateZ(0)}
+#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.95)}
 .overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1}
 
 /* cinematic bars */
@@ -29,7 +28,7 @@ button{font-family:inherit;cursor:pointer}
 /* app shell */
 .app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
 
-/* main frame: collapsible grid (left/chat | right/game) */
+/* main frame */
 .frame{width:100%;max-width:1120px;height:80vh;max-height:820px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:grid-template-columns .44s cubic-bezier(.2,.9,.2,1)}
 .frame.collapsed{grid-template-columns:0 1fr}
 
@@ -41,13 +40,12 @@ button{font-family:inherit;cursor:pointer}
 .msg{max-width:86%;padding:10px 12px;border-radius:14px;margin:8px 0;position:relative;line-height:1.35}
 .msg.me{margin-left:auto;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))}
 .msg.them{margin-right:auto;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
-.msg .small{font-size:12px;color:var(--muted);margin-top:6px;display:block}
 .typing{height:26px;display:flex;align-items:center;gap:6px;padding-left:6px}
 .dot{width:7px;height:7px;background:rgba(255,255,255,0.14);border-radius:50%;animation:blink 1200ms infinite}
 .dot:nth-child(2){animation-delay:160ms} .dot:nth-child(3){animation-delay:320ms}
 @keyframes blink{0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25}}
 
-/* right game area */
+/* right game */
 .right{position:relative;padding:18px;display:flex;flex-direction:column;gap:12px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .title{font-size:18px;font-weight:700}
@@ -56,12 +54,12 @@ button{font-family:inherit;cursor:pointer}
 .score{font-family:var(--mono);background:var(--glass);padding:8px 12px;border-radius:10px}
 .saved-row{display:flex;gap:8px;align-items:center}
 .saved-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform 160ms}
-.saved-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.saved-thumb img{width:100%;height:100%;object-fit:cover}
 .saved-thumb:active{transform:scale(.96)}
 .btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:700}
 .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--fg);padding:8px 12px}
 
-/* improved gallery button visual */
+/* improved gallery button */
 .btn.secondary#openGallery{background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px}
 
 /* game wrap */
@@ -69,7 +67,7 @@ button{font-family:inherit;cursor:pointer}
 .game-canvas{position:absolute;inset:0;pointer-events:none;z-index:6}
 .game-stage{position:relative;width:100%;height:100%;display:block;pointer-events:none}
 
-/* memories (cards) */
+/* memories */
 .memory{position:absolute;pointer-events:auto;user-select:none;touch-action:none;width:120px;height:120px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 18px 48px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 220ms ease,opacity 220ms}
 .memory img{width:100%;height:100%;object-fit:cover}
 .mem-label{position:absolute;left:8px;bottom:6px;font-size:11px;color:rgba(255,255,255,0.9)}
@@ -77,10 +75,7 @@ button{font-family:inherit;cursor:pointer}
 /* drop area */
 .drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:var(--mono);z-index:7}
 
-/* cinematic overlay & vignette */
-.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.25) 100%);z-index:8}
-
-/* final wrap: hidden by default, becomes active on final */
+/* final wrap */
 .final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:12px;text-align:left;opacity:0;pointer-events:none;z-index:80;transition:opacity .45s ease}
 .final-wrap.active{opacity:1;pointer-events:auto}
 .final-title{font-size:22px;font-weight:700}
@@ -107,8 +102,8 @@ button{font-family:inherit;cursor:pointer}
 </head>
 <body>
 
-<!-- bg video: name must be bg.mp4 in same folder as index.html -->
-<video id="bg-video" autoplay muted loop playsinline playsinline webkit-playsinline>
+<!-- bg video (must be bg.mp4) -->
+<video id="bg-video" autoplay muted loop playsinline webkit-playsinline>
   <source src="bg.mp4" type="video/mp4">
 </video>
 <div class="overlay" aria-hidden="true"></div>
@@ -119,7 +114,7 @@ button{font-family:inherit;cursor:pointer}
 <div class="app" role="application" aria-label="Интерактивный подарок">
   <div class="frame" id="frame">
 
-    <!-- LEFT: chat -->
+    <!-- LEFT -->
     <div class="left" id="leftPane" aria-label="Сообщения">
       <div class="header-left">
         <div class="avatar">P</div>
@@ -137,7 +132,7 @@ button{font-family:inherit;cursor:pointer}
       </div>
     </div>
 
-    <!-- RIGHT: game -->
+    <!-- RIGHT -->
     <div class="right" id="rightPane" aria-label="Игровая сцена">
       <div class="topbar">
         <div>
@@ -189,15 +184,20 @@ button{font-family:inherit;cursor:pointer}
   <div class="card" id="viewerCard" style="max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden"></div>
 </div>
 
+<!-- Audio elements (required files in repo root) -->
+<audio id="music" src="music.mp3" preload="auto" loop></audio>
+<audio id="click" src="click.mp3" preload="auto"></audio>
+
 <script>
-/* ====== CONFIG: укажи имена файлов, подписи и настройки ====== */
+/* CONFIG: добавлены 3 мемори и 3 питомца (mem1..3, pet1..3) */
 const CONFIG = {
   memories:[
     {type:'img', content:'mem1.jpg', label:'Первое фото'},
     {type:'img', content:'mem2.jpg', label:'Наш смех'},
     {type:'img', content:'mem3.jpg', label:'Кофе вместе'},
-    {type:'img', content:'pet1.jpg', label:'Котик'},
-    {type:'text', content:'Первое "привет"', label:'Привет'}
+    {type:'img', content:'pet1.jpg', label:'Котик 1'},
+    {type:'img', content:'pet2.jpg', label:'Котик 2'},
+    {type:'img', content:'pet3.jpg', label:'Котик 3'}
   ],
   requiredToWin:5,
   spawnInterval:700,
@@ -207,15 +207,13 @@ const CONFIG = {
   finalMedia:'final.mp4',
   storageKey:'gift_v2_saved'
 };
-/* =========================================================== */
 
+/* Selectors */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
-/* UI elements */
-const frame = $('#frame'), leftPane = $('#leftPane'), rightPane = $('#rightPane');
-const chatArea = $('#chatArea'), typing = $('#typing'), startBtn = $('#startBtn');
-const gameArea = $('#gameArea'), dropArea = $('#dropArea');
+const frame = $('#frame'), startBtn = $('#startBtn'), typing = $('#typing');
+const chatArea = $('#chatArea'), gameArea = $('#gameArea'), dropArea = $('#dropArea');
 const savedBar = $('#savedBar'), scoreBox = $('#scoreBox');
 const openGalleryBtn = $('#openGallery'), galleryModal = $('#galleryModal'), galleryGrid = $('#galleryGrid'), closeGalleryBtn = $('#closeGallery');
 const viewer = $('#viewer'), viewerCard = $('#viewerCard'), closeViewer = $('#closeViewer');
@@ -226,7 +224,11 @@ const clearSaved = $('#clearSaved'), replayBtn = $('#replayBtn'), writeBtn = $('
 /* State */
 let activeMemories = [], spawnTimer = null, score = 0;
 let savedMemories = loadSaved(CONFIG.storageKey) || [];
-let storySequence = [
+let audioCtx = null, musicSource=null, musicGain=null, musicEl = document.getElementById('music'), clickEl = document.getElementById('click');
+let audioInitialized = false;
+
+/* Chat intro */
+const storySequence = [
   {who:'them', text:'Привет. Я немного нервничаю.'},
   {who:'them', text:'Решил сделать маленький подарок — это займет минуту.'},
   {who:'them', text:'Тут лёгкая игра: нужно сохранить пару моментов.'},
@@ -234,17 +236,31 @@ let storySequence = [
   {who:'them', text:'Готов? Нажми «Начать».'}
 ];
 
-/* cinematic entry */
+/* Final paragraphs (your text kept as before) */
+const FINAL_PARAGRAPHS = [
+`Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
+`Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
+`Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
+`Если бы я был слепым — ты была бы моим зрением.
+Если бы я был глухим — ты была бы моим слухом.
+Если бы я был немым — ты была бы моим голосом.`,
+`Если бы не было тебя — не было бы меня.
+
+Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
+];
+
+/* Utilities */
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* Cinematic entry */
 (async function cinematicEntry(){
   lbTop.style.height='0px'; lbBottom.style.height='0px';
   requestAnimationFrame(()=>{ lbTop.style.transition='height 480ms ease'; lbBottom.style.transition='height 480ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
   await sleep(820);
   await runChatIntro();
-  // collapse letterbox smoothly
   lbTop.style.height='0px'; lbBottom.style.height='0px';
 })();
 
-/* chat intro */
 async function runChatIntro(){
   chatArea.innerHTML='';
   for(let i=0;i<storySequence.length;i++){
@@ -257,69 +273,132 @@ async function runChatIntro(){
   startBtn.classList.remove('hidden');
 }
 
-/* append message */
 async function appendMessage(who, text){
-  const el = document.createElement('div'); el.className='msg ' + (who==='me' ? 'me' : 'them');
+  const el = document.createElement('div'); el.className = 'msg ' + (who==='me' ? 'me' : 'them');
   el.innerHTML = `<div>${text}</div>`;
   chatArea.appendChild(el);
   chatArea.scrollTop = chatArea.scrollHeight;
-  el.style.opacity=0; el.style.transform='translateY(8px)';
-  requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; });
+  el.style.opacity = 0; el.style.transform = 'translateY(8px)';
+  requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity = 1; el.style.transform = 'translateY(0)'; });
 }
 
-/* start button -> collapse left pane & init game */
+/* AUDIO: init audio context and crossfade music */
+function initAudioOnce(){
+  if(audioInitialized) return;
+  audioInitialized = true;
+  try{
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(musicEl){
+      musicSource = audioCtx.createMediaElementSource(musicEl);
+      musicGain = audioCtx.createGain();
+      musicGain.gain.value = 0.0; // start silent
+      musicSource.connect(musicGain).connect(audioCtx.destination);
+      musicEl.loop = true;
+    }
+  }catch(e){
+    console.warn('Audio init failed', e);
+  }
+}
+
+/* Fade music to target (0.0..1.0) over time seconds */
+function fadeMusicTo(target = 1.0, time = 1.2){
+  if(!musicGain || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  musicGain.gain.cancelScheduledValues(now);
+  musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+  musicGain.gain.linearRampToValueAtTime(target, now + time);
+}
+
+/* Start music playback (called after user gesture) */
+function startMusic(){
+  if(!musicEl) return;
+  try{
+    // resume audio context if needed
+    if(audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume().catch(()=>{}); }
+    // start element and ramp up
+    const p = musicEl.play();
+    if(p && p.then){
+      p.then(()=>{ fadeMusicTo(1.0, 1.6); }).catch(()=>{ /* blocked */ });
+    } else {
+      fadeMusicTo(1.0, 1.6);
+    }
+  }catch(e){
+    console.warn('startMusic error', e);
+  }
+}
+
+/* Fade out and stop music */
+function stopMusic(){
+  try{
+    fadeMusicTo(0.0, 1.0);
+    setTimeout(()=>{ if(musicEl){ musicEl.pause(); } }, 1100);
+  }catch(e){}
+}
+
+/* Play click sound (quick) */
+function playClick(){
+  if(!clickEl) return;
+  try{ clickEl.currentTime = 0; clickEl.play().catch(()=>{}); }catch(e){}
+}
+
+/* Start button behavior: init audio then collapse and start game */
 startBtn.addEventListener('click', async ()=>{
+  // initialize audio & play music with fade
+  initAudioOnce();
+  if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume().catch(()=>{});
+  startMusic();
+
   startBtn.disabled = true;
   startBtn.textContent = 'Идёт...';
   await sleep(180);
-  // add a 'me' message
   await appendMessage('me','Окей — начинаем!');
-  // collapse left with smooth layout change
   frame.classList.add('collapsed');
-  // small delay to let collapse animation run
   await sleep(420);
-  // initialize game
   initGame();
 });
 
-/* initialize game */
+/* Game init/spawn logic */
 function initGame(){
   score = 0; updateScore();
-  // preload images
   CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
   spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
   spawnMemory();
   renderSavedBar();
 }
 
-/* spawn memory card */
+/* spawn memory */
 function spawnMemory(){
   const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
-  const node = document.createElement('div'); node.className='memory';
+  const node = document.createElement('div'); node.className = 'memory';
   node.style.left = (6 + Math.random()*88) + '%'; node.style.top = '-160px';
   node.tabIndex = 0;
-  if(template.type==='img'){
-    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || ''; node.appendChild(img);
-    const lab = document.createElement('div'); lab.className='mem-label'; lab.innerText = template.label || ''; node.appendChild(lab);
+  if(template.type === 'img'){
+    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || '';
+    node.appendChild(img);
+    const lab = document.createElement('div'); lab.className = 'mem-label'; lab.innerText = template.label || '';
+    node.appendChild(lab);
   } else {
     const t = document.createElement('div'); t.style.padding='8px'; t.innerText = template.content; node.appendChild(t);
   }
   gameArea.appendChild(node);
-  const memObj = {el:node, y:-160, id:Date.now()+Math.random(), meta:template};
+  const memObj = { el: node, y: -160, id: Date.now()+Math.random(), meta: template };
   activeMemories.push(memObj);
 
-  // click to save
   node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(memObj); });
   node.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(memObj); });
 
-  // drag support
   let dragging=false, startX=0, startY=0, offsetX=0, offsetY=0;
   node.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; startX=ev.clientX; startY=ev.clientY; offsetX=parseFloat(node.style.left); offsetY=memObj.y; node.style.transition='transform 0s'; });
   node.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const dx = ev.clientX - startX; const dy = ev.clientY - startY; memObj.y = offsetY + dy; node.style.top = memObj.y + 'px'; node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)){ dropArea.style.borderColor='rgba(255,255,255,0.7)'; } else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
   node.addEventListener('pointerup', (ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(memObj); });
+
+  // attach triple-tap easter if pet image
+  if(template.type === 'img' && template.content && template.content.startsWith('pet')){
+    attachTripleTap(node, ()=>{ showPetEaster(template.label || 'Питомец') });
+  }
 }
 
-/* falling ticker */
+/* falling motion */
 const ticker = setInterval(()=>{
   activeMemories.forEach(m=>{ m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5)); if(m.el) m.el.style.top = (m.y) + 'px'; });
   activeMemories = activeMemories.filter(m=>{
@@ -332,7 +411,7 @@ const ticker = setInterval(()=>{
 
 function intersect(r1,r2){ return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top); }
 
-/* save memory -> animate to saved, persist */
+/* save memory -> animate and persist */
 function saveMemory(memObj){
   if(!memObj || !memObj.el) return;
   memObj.el.style.transition='transform 320ms ease, opacity 320ms ease'; memObj.el.style.transform='scale(0.78) translateY(20px)'; memObj.el.style.opacity='0';
@@ -343,6 +422,9 @@ function saveMemory(memObj){
   savedMemories.push(item);
   persistSaved(CONFIG.storageKey, savedMemories);
   renderSavedBar();
+
+  // feedback: click sound + flash
+  playClick();
   flash();
   score++; updateScore();
   if(score >= CONFIG.requiredToWin) triggerFinalSequence();
@@ -350,13 +432,20 @@ function saveMemory(memObj){
 function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,120,150,0.04)'; setTimeout(()=>{ document.body.style.boxShadow=''; },260); }
 function updateScore(){ scoreBox.textContent = score; }
 
-/* render saved thumbs in HUD */
+/* render saved bar in HUD */
 function renderSavedBar(){
-  savedBar.innerHTML=''; const list = savedMemories.slice(-6);
-  list.forEach(item=>{ const el = document.createElement('div'); el.className='saved-thumb'; if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; el.appendChild(img); } else { el.textContent = item.label || item.content; el.style.padding='6px'; el.style.fontSize='12px'; } el.addEventListener('click', ()=> openViewer(item)); savedBar.appendChild(el); });
+  savedBar.innerHTML = '';
+  const list = savedMemories.slice(-6);
+  list.forEach(item=>{
+    const el = document.createElement('div'); el.className = 'saved-thumb';
+    if(item.type === 'img'){ const img = document.createElement('img'); img.src = item.content; img.alt = item.label || ''; el.appendChild(img); }
+    else { el.textContent = item.label || item.content; el.style.padding='6px'; }
+    el.addEventListener('click', ()=> openViewer(item));
+    savedBar.appendChild(el);
+  });
 }
 
-/* persist/load helpers */
+/* persist/load */
 function persistSaved(key, arr){ try{ localStorage.setItem(key, JSON.stringify(arr)); }catch(e){} }
 function loadSaved(key){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : []; }catch(e){ return []; } }
 
@@ -371,6 +460,8 @@ async function triggerFinalSequence(){
   await sleep(600);
   await appendMessage('them','Особенно чувства.');
   await sleep(700);
+  // fade out music gracefully
+  stopMusic();
   showFinal();
   setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; },1200);
 }
@@ -380,13 +471,13 @@ function stopSpawning(){ clearInterval(spawnTimer); spawnTimer=null; }
 function showFinal(){
   finalWrap.classList.add('active'); finalTextEl.innerHTML='';
   (async ()=>{
-    for(const p of FINAL_PARAGRAPHS){ const el=document.createElement('p'); el.innerHTML = p.replace(/\n/g,'<br>'); el.style.opacity=0; el.style.transform='translateY(8px)'; finalTextEl.appendChild(el); requestAnimationFrame(()=>{ el.style.transition='opacity 420ms ease, transform 420ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; }); await sleep(900); }
+    for(const p of FINAL_PARAGRAPHS){ const el = document.createElement('p'); el.innerHTML = p.replace(/\n/g,'<br>'); el.style.opacity=0; el.style.transform='translateY(8px)'; finalTextEl.appendChild(el); requestAnimationFrame(()=>{ el.style.transition='opacity 420ms ease, transform 420ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; }); await sleep(900); }
   })();
   if(CONFIG.finalMedia && CONFIG.finalMedia.toLowerCase().endsWith('.mp4')){ finalVideo.src = CONFIG.finalMedia; finalVideo.classList.remove('hidden'); finalVideo.play().catch(()=>{}); }
 }
 
-/* replay final & write button */
-replayBtn.addEventListener('click', ()=>{ if(finalVideo.src){ finalVideo.currentTime=0; finalVideo.play().catch(()=>{});} });
+/* replay final & write */
+replayBtn.addEventListener('click', ()=>{ if(finalVideo.src){ finalVideo.currentTime = 0; finalVideo.play().catch(()=>{}); }});
 writeBtn.addEventListener('click', ()=>{ const mail = prompt('Введите e-mail (оставьте пустым чтобы пропустить)'); if(mail && mail.trim()) window.location.href = 'mailto:' + encodeURIComponent(mail) + '?subject=Привет'; });
 
 /* gallery */
@@ -395,23 +486,37 @@ closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('a
 function openGallery(){
   galleryGrid.innerHTML = '';
   if(savedMemories.length===0){ const n=document.createElement('div'); n.className='muted'; n.style.padding='20px'; n.textContent='Пока пусто — сначала сохрани пару моментов.'; galleryGrid.appendChild(n); }
-  else{ savedMemories.slice().reverse().forEach(item=>{ const g=document.createElement('div'); g.className='thumb'; if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; g.appendChild(img); } else { const t=document.createElement('div'); t.style.padding='12px'; t.textContent=item.label||item.content; g.appendChild(t); } const cap = document.createElement('div'); cap.className='cap'; cap.textContent = item.label || new Date(item.when).toLocaleString(); g.appendChild(cap); g.addEventListener('click', ()=> openViewer(item)); galleryGrid.appendChild(g); }); }
+  else{ savedMemories.slice().reverse().forEach(item=>{ const g=document.createElement('div'); g.className='thumb'; if(item.type==='img'){ const img = document.createElement('img'); img.src = item.content; g.appendChild(img); } else { const t=document.createElement('div'); t.style.padding='12px'; t.textContent = item.label || item.content; g.appendChild(t); } const cap = document.createElement('div'); cap.className='cap'; cap.textContent = item.label || new Date(item.when).toLocaleString(); g.appendChild(cap); g.addEventListener('click', ()=> openViewer(item)); galleryGrid.appendChild(g); }); }
   galleryModal.classList.add('active'); galleryModal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
 }
 
 /* viewer */
 function openViewer(item){
-  viewerCard.innerHTML=''; const wrap=document.createElement('div'); wrap.style.padding='0'; const content=document.createElement('div'); if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; content.appendChild(img); } else { const t=document.createElement('div'); t.style.padding='18px'; t.style.color='white'; t.textContent=item.content; content.appendChild(t); } const meta = document.createElement('div'); meta.className='meta'; meta.textContent = (item.label ? item.label + ' — ' : '') + new Date(item.when).toLocaleString(); wrap.appendChild(content); wrap.appendChild(meta); viewerCard.appendChild(wrap); viewer.classList.add('active'); viewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; wrap.style.transform='scale(.96)'; wrap.style.opacity='0'; requestAnimationFrame(()=>{ wrap.style.transition='transform 420ms ease, opacity 420ms ease'; wrap.style.transform='scale(1)'; wrap.style.opacity='1'; }); galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true');
+  viewerCard.innerHTML = '';
+  const wrap = document.createElement('div'); wrap.style.padding='0';
+  const content = document.createElement('div');
+  if(item.type === 'img'){ const img = document.createElement('img'); img.src = item.content; img.alt = item.label || ''; content.appendChild(img); }
+  else { const t = document.createElement('div'); t.style.padding='18px'; t.style.color='white'; t.textContent = item.content; content.appendChild(t); }
+  const meta = document.createElement('div'); meta.className='meta'; meta.textContent = (item.label ? item.label + ' — ' : '') + new Date(item.when).toLocaleString();
+  wrap.appendChild(content); wrap.appendChild(meta); viewerCard.appendChild(wrap);
+  viewer.classList.add('active'); viewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+  wrap.style.transform='scale(.96)'; wrap.style.opacity='0';
+  requestAnimationFrame(()=>{ wrap.style.transition='transform 420ms ease, opacity 420ms ease'; wrap.style.transform='scale(1)'; wrap.style.opacity='1'; });
+  galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true');
 }
 closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; });
 
 /* clear saved */
 clearSaved.addEventListener('click', ()=>{ if(!confirm('Очистить все сохранённые моменты?')) return; savedMemories=[]; persistSaved(CONFIG.storageKey, savedMemories); renderSavedBar(); alert('Готово — сохранения удалены.'); });
 
-/* helpers */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function persistSaved(key,arr){ try{ localStorage.setItem(key, JSON.stringify(arr)); }catch(e){} }
-function loadSaved(key){ try{ const s=localStorage.getItem(key); return s ? JSON.parse(s) : []; }catch(e){ return []; } }
+/* triple tap easter */
+function attachTripleTap(node, cb){
+  let taps = [];
+  node.addEventListener('pointerdown', (e)=>{ const now = Date.now(); taps.push(now); taps = taps.filter(t => now - t < 1200); if(taps.length >= 3){ taps=[]; try{ cb(); }catch(e){} }});
+}
+function showPetEaster(name){
+  const msg = document.createElement('div'); msg.style.position='fixed'; msg.style.top='14%'; msg.style.left='50%'; msg.style.transform='translateX(-50%)'; msg.style.padding='12px 16px'; msg.style.borderRadius='12px'; msg.style.background='linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))'; msg.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'; msg.style.zIndex='140'; msg.innerHTML = `<strong>Псс…</strong> ${name} — герой этой истории :)`; document.body.appendChild(msg); setTimeout(()=>{ msg.style.transition='opacity 420ms ease'; msg.style.opacity=0; setTimeout(()=>msg.remove(),420); },2200);
+}
 
 /* Prevent overscroll while dragging */
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
@@ -419,13 +524,6 @@ document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.cl
 /* init UI */
 (function initUI(){ renderSavedBar(); })();
 
-/* small helper: render saved bar used in HUD */
-function renderSavedBar(){ savedBar.innerHTML=''; const last=savedMemories.slice(-6); last.forEach(item=>{ const el=document.createElement('div'); el.className='saved-thumb'; if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; el.appendChild(img);} else { el.textContent=item.label||item.content; el.style.padding='6px'; el.style.fontSize='12px'; } el.addEventListener('click', ()=> openViewer(item)); savedBar.appendChild(el); }); }
-
-/* Accessibility: ESC closes modals */
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ if(viewer.classList.contains('active')){ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; } if(galleryModal.classList.contains('active')){ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; } } });
-
-/* End of script */
 </script>
 </body>
 </html>
