@@ -5,40 +5,47 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Интернет открыточка Полиночке</title>
+
 <style>
 :root{
   --bg:#030312; --fg:#f6f6f6; --muted:rgba(255,255,255,0.14);
-  --accent:#ff6b8f; --glass:rgba(255,255,255,0.03); --shadow:0 22px 90px rgba(0,0,0,0.7);
-  --ui-radius:14px; --mono:ui-monospace, SFMono-Regular, Menlo, monospace;
+  --accent-start:#ff9db5; --accent-end:#ff6b8f;
+  --glass:rgba(255,255,255,0.03); --shadow:0 22px 90px rgba(0,0,0,0.7);
   --safe-zone:92px;
   --music-target:0.6;
   --music-fade:2.4s;
 }
+/* basic */
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;touch-action:manipulation}
-button{font-family:inherit;cursor:pointer;border:0}
+button{font-family:inherit;border:0;cursor:pointer}
+a{color:inherit}
 
-/* Background video + overlay */
-#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.92) saturate(1.02)}
+/* background */
+#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.92) saturate(1.03)}
 .overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1}
 
-/* Cinematic bars */
+/* cinematic bars */
 .letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:0;background:#000;z-index:40;pointer-events:none}
 .letterbox-top{top:0} .letterbox-bottom{bottom:0}
 
-/* App shell */
-.app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+/* app shell */
+.app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 
-/* Frame */
-.frame{width:100%;max-width:1120px;height:80vh;max-height:820px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:grid-template-columns .44s cubic-bezier(.2,.9,.2,1)}
+/* frame */
+.frame{width:100%;max-width:1120px;height:82vh;max-height:880px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:all .48s cubic-bezier(.2,.9,.2,1)}
 .frame.collapsed{grid-template-columns:0 1fr}
 
-/* LEFT (chat) */
-.left{padding:18px;border-right:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));overflow:hidden}
+/* left panel */
+.left{
+  padding:18px;border-right:1px solid rgba(255,255,255,0.02);
+  display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));
+  overflow:hidden;
+}
 .header-left{display:flex;align-items:center;gap:12px}
-.avatar-wrap{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff9db5,#6bd0ff);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar-wrap{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-start),#6bd0ff);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
-.avatar-fallback{font-weight:700;color:#09090a;font-size:20px}
+.avatar-fallback{font-weight:700;color:#09090a;font-size:20px;display:flex;align-items:center;justify-content:center;height:100%;width:100%}
 .chat-area{flex:1;overflow:auto;padding-right:6px;-webkit-overflow-scrolling:touch}
 .msg{max-width:86%;padding:10px 12px;border-radius:14px;margin:8px 0;position:relative;line-height:1.35}
 .msg.me{margin-left:auto;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))}
@@ -48,53 +55,93 @@ button{font-family:inherit;cursor:pointer;border:0}
 .dot:nth-child(2){animation-delay:160ms} .dot:nth-child(3){animation-delay:320ms}
 @keyframes blink{0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25}}
 
-/* RIGHT */
+/* right area */
 .right{position:relative;padding:18px;display:flex;flex-direction:column;gap:12px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.title{font-size:28px;font-weight:800;font-family: Georgia, "Times New Roman", Times, serif; text-align:center;letter-spacing:0.8px;text-transform:uppercase;color:#fff;text-shadow:0 6px 30px rgba(255,107,143,0.08);margin:0}
 .title-wrap{flex:1;display:flex;align-items:center;justify-content:center}
+.title{
+  font-family: "Georgia","Times New Roman", Times, serif;
+  font-weight:800;
+  font-size:36px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin:0;
+  line-height:1;
+  background:linear-gradient(90deg,#fff 0%, #ffd6e6 30%, #ffb0d0 60%, #fff 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-shadow:0 8px 30px rgba(0,0,0,0.35);
+  filter:drop-shadow(0 6px 30px rgba(0,0,0,0.25));
+  display:inline-block;
+  will-change:transform;
+}
+/* shimmer gradient animation for title */
+@keyframes shimmer {
+  0%{background-position: -120% 0}
+  100%{background-position: 220% 0}
+}
+.title{background-size:300% 100%; animation: shimmer 5s linear infinite;}
+
+/* per-letter bounce (we wrap letters in spans .char with --i index) */
+.char{display:inline-block;transform-origin:center;animation:letterFloat 1.6s ease-in-out infinite; will-change:transform; }
+@keyframes letterFloat{
+  0%{transform:translateY(0)}
+  30%{transform:translateY(-6px)}
+  60%{transform:translateY(3px)}
+  100%{transform:translateY(0)}
+}
+
+/* HUD */
 .hud{display:flex;align-items:center;gap:10px}
-.score{font-family:var(--mono);background:var(--glass);padding:8px 12px;border-radius:10px}
+.score{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:var(--glass);padding:8px 12px;border-radius:10px}
 .saved-row{display:flex;gap:8px;align-items:center}
 .saved-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform 160ms}
 .saved-thumb img{width:100%;height:100%;object-fit:cover}
 .saved-thumb:active{transform:scale(.96)}
-.btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:700}
+.btn{padding:8px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:white;font-weight:700}
 .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--fg);padding:8px 12px}
 
-/* Game wrap */
+/* game area */
 .game-wrap{flex:1;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .game-canvas{position:absolute;inset:0;pointer-events:none;z-index:6}
-.drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:var(--mono);z-index:7}
+.drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:ui-monospace, monospace;z-index:7}
 
-/* Memory card (no labels now) */
-.memory{position:absolute;pointer-events:auto;user-select:none;touch-action:none;width:120px;height:120px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 18px 48px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 220ms ease,opacity 220ms}
+/* memory cards: contain image (no crop), add small padding and border-radius */
+.memory{
+  position:absolute;
+  pointer-events:auto;
+  user-select:none;
+  touch-action:none;
+  width:120px;height:120px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.02);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  box-shadow:0 18px 48px rgba(0,0,0,0.55);
+  transition:transform 220ms ease, opacity 220ms;
+  will-change:transform, top, left;
+  padding:8px;
+}
+.memory img{width:100%;height:100%;object-fit:contain;display:block;border-radius:8px;}
 
-/* Final overlay: romantic text + heart */
+/* final overlay */
 .final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px;gap:18px;text-align:center;opacity:0;pointer-events:none;z-index:80;transition:opacity .45s ease}
 .final-wrap.active{opacity:1;pointer-events:auto}
 .romantic{
-  font-family: Georgia, "Times New Roman", Times, serif;
+  font-family: "Georgia","Times New Roman", Times, serif;
   font-size:22px;
   max-width:920px;
   color:#fff;
   line-height:1.45;
-  text-shadow:0 10px 30px rgba(0,0,0,0.6);
   transform-origin:center;
+  text-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
-.romantic p{margin:16px 0; opacity:0; transform: translateY(14px) scale(0.99); transition:opacity .6s ease, transform .6s cubic-bezier(.2,.9,.2,1)}
-.romantic p.visible{opacity:1; transform: translateY(0) scale(1)}
+.romantic p{margin:10px 0;opacity:0;transform:translateY(14px) scale(.99);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.9,.2,1)}
+.romantic p.visible{opacity:1;transform:translateY(0) scale(1)}
 
-/* Pulsing heart */
-.heart{
-  width:120px;height:120px;border-radius:999px;background:radial-gradient(circle at 30% 30%, #ff9db5, #ff6b8f);display:flex;align-items:center;justify-content:center;color:white;font-size:42px;box-shadow:0 20px 60px rgba(255,107,143,0.12);cursor:pointer;
-  animation:heartPulse 1.6s infinite;
-}
-@keyframes heartPulse{
-  0%{transform:scale(0.98); box-shadow:0 18px 50px rgba(255,107,143,0.08)}
-  50%{transform:scale(1.06); box-shadow:0 30px 80px rgba(255,107,143,0.16)}
-  100%{transform:scale(0.98)}
-}
+/* fancy heart (SVG container) */
+.heart-svg{width:140px;height:140px;display:flex;align-items:center;justify-content:center;cursor:pointer;filter:drop-shadow(0 20px 50px rgba(255,80,120,0.15));animation:heartPulse 1.6s infinite}
+@keyframes heartPulse{0%{transform:scale(.98)}50%{transform:scale(1.06)}100%{transform:scale(.98)}}
 
 /* modal & viewer */
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:100;padding:18px}
@@ -106,12 +153,21 @@ button{font-family:inherit;cursor:pointer;border:0}
 .viewer.active{display:flex}
 .viewer .card{max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18));box-shadow:0 40px 140px rgba(0,0,0,0.8)}
 
-@media (max-width:980px){ .frame{grid-template-columns:1fr} .left{order:2} .right{order:1} .frame{height:88vh} .drop-area{right:12px;left:12px;width:auto} .title{font-size:22px} .heart{width:96px;height:96px;font-size:34px} .romantic{font-size:18px} }
+/* small screen adjustments */
+@media (max-width:980px){
+  .frame{grid-template-columns:1fr}
+  .left{order:2}
+  .right{order:1}
+  .frame{height:88vh}
+  .drop-area{right:12px;left:12px;width:auto}
+  .title{font-size:28px}
+  .heart-svg{width:110px;height:110px}
+}
 </style>
 </head>
 <body>
 
-<!-- Background video -->
+<!-- background video -->
 <video id="bg-video" autoplay muted loop playsinline webkit-playsinline>
   <source src="bg.mp4" type="video/mp4">
 </video>
@@ -123,11 +179,10 @@ button{font-family:inherit;cursor:pointer;border:0}
 <div class="app" role="application" aria-label="Интерактивная открытка">
   <div class="frame" id="frame">
 
-    <!-- LEFT: header with avatar image -->
+    <!-- LEFT -->
     <div class="left" id="leftPane" aria-label="Сообщения">
       <div class="header-left">
         <div class="avatar-wrap" id="avatarWrap">
-          <!-- Put avatar.jpg in repo root. Fallback shows P -->
           <img id="avatarImg" src="avatar.jpg" alt="P" onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'">
           <div id="avatarFallback" class="avatar-fallback" style="display:none">P</div>
         </div>
@@ -145,10 +200,10 @@ button{font-family:inherit;cursor:pointer;border:0}
       </div>
     </div>
 
-    <!-- RIGHT: title centered, HUD on right -->
+    <!-- RIGHT -->
     <div class="right" id="rightPane" aria-label="Игровая сцена">
       <div class="topbar">
-        <div class="title-wrap"><div class="title">БОМБЁЖКА МИЛОТОЙ</div></div>
+        <div class="title-wrap"><div id="title" class="title">БОМБЁЖКА МИЛОТОЙ</div></div>
         <div class="hud">
           <div class="score" id="scoreBox">0</div>
           <div class="saved-row" id="savedBar" aria-hidden="false"></div>
@@ -160,16 +215,47 @@ button{font-family:inherit;cursor:pointer;border:0}
         <div class="game-canvas" id="gameArea"></div>
         <div class="drop-area" id="dropArea">Перетащи сюда — сохранить</div>
 
-        <!-- final overlay: romantic paragraphs & heart -->
+        <!-- final overlay -->
         <div class="final-wrap" id="finalWrap" aria-hidden="true">
           <div class="romantic" id="romanticText" aria-hidden="true"></div>
+
           <div id="heartContainer" style="display:none">
-            <div class="heart" id="heartBtn">❤</div>
+            <!-- SVG heart with gradient + arrow; no background so it's "floating" -->
+            <div class="heart-svg" id="heartSvgWrap" title="Нажми, чтобы продолжить">
+              <!-- inline SVG heart + arrow -->
+              <svg viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Сердце">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#ff9db5"/>
+                    <stop offset="50%" stop-color="#ff6b8f"/>
+                    <stop offset="100%" stop-color="#ff4a7a"/>
+                  </linearGradient>
+                  <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#ff6b8f" flood-opacity="0.14"/>
+                  </filter>
+                </defs>
+
+                <!-- heart shape -->
+                <g filter="url(#shadow)">
+                  <path id="heartPath" d="M100 170c-30-18-62-42-74-62-12-20-2-46 18-52 16-5 36 2 46 16 10-14 30-21 46-16 20 6 30 32 18 52-12 20-44 44-74 62z" fill="url(#g1)" stroke="rgba(255,255,255,0.08)" stroke-width="2" />
+                </g>
+
+                <!-- arrow piercing through the heart -->
+                <g transform="translate(-10,-20) rotate(-18 100 100)" opacity="0.95">
+                  <rect x="20" y="96" width="160" height="6" rx="3" fill="#d0d0d0" />
+                  <polygon points="12,90 20,96 12,102" fill="#d0d0d0"/>
+                  <polygon points="188,96 200,92 200,100" fill="#fff2"/>
+                </g>
+
+                <!-- small glossy highlight -->
+                <ellipse cx="75" cy="65" rx="22" ry="10" fill="rgba(255,255,255,0.12)" transform="rotate(-25 75 65)"/>
+              </svg>
+            </div>
             <div style="margin-top:10px;color:var(--muted);font-size:13px">Нажми на сердце, чтобы продолжить</div>
           </div>
 
-          <!-- final video (hidden until heart click) -->
-          <video id="finalVideo" class="hidden" playsinline controls style="width:100%;max-height:420px;border-radius:12px;overflow:hidden"></video>
+          <!-- final video hidden until heart click -->
+          <video id="finalVideo" class="hidden" playsinline controls style="width:100%;max-height:420px;border-radius:12px;overflow:hidden;display:none"></video>
         </div>
 
         <div class="vignette" aria-hidden="true"></div>
@@ -183,29 +269,24 @@ button{font-family:inherit;cursor:pointer;border:0}
   </div>
 </div>
 
-<!-- Gallery modal -->
+<!-- gallery modal -->
 <div class="modal" id="galleryModal" aria-hidden="true">
   <div class="grid" id="galleryGrid"></div>
   <button class="btn" id="closeGallery" style="position:fixed;left:18px;top:18px">Закрыть</button>
 </div>
 
-<!-- Viewer -->
+<!-- viewer -->
 <div class="viewer" id="viewer" aria-hidden="true">
   <div class="viewer-close" id="closeViewer" style="position:fixed;right:18px;top:18px;background:rgba(0,0,0,0.45);padding:10px;border-radius:12px;cursor:pointer">✕</div>
   <div class="card" id="viewerCard" style="max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden"></div>
 </div>
 
-<!-- Audio -->
+<!-- audio elements -->
 <audio id="music" src="music.mp3" preload="auto" loop></audio>
 <audio id="click" src="click.mp3" preload="auto"></audio>
 
 <script>
-/* === CONFIG ===
-Files expected in repo root:
-  bg.mp4, music.mp3, click.mp3, final.mp4,
-  mem1.jpg, mem2.jpg, mem3.jpg, pet1.jpg, pet2.jpg, pet3.jpg,
-  avatar.jpg (avatar image name — put it in repo root)
-*/
+/* CONFIG — ожидает файлы в корне репозитория */
 const CONFIG = {
   memories:[
     {type:'img', content:'mem1.jpg'},
@@ -215,89 +296,36 @@ const CONFIG = {
     {type:'img', content:'pet2.jpg'},
     {type:'img', content:'pet3.jpg'}
   ],
-  requiredToWin: 5,
-  spawnInterval: 700,
-  fallSpeed: 28,
-  tickInterval: 28,
-  maxSimultaneous: 4,
-  finalMedia: 'final.mp4',
-  storageKey: 'gift_v3_session' // we will NOT persist across visits
+  requiredToWin:5,
+  spawnInterval:700,
+  fallSpeed:28,
+  tickInterval:28,
+  maxSimultaneous:4,
+  finalMedia:'final.mp4'
 };
-/* =========== */
 
+/* short selectors */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
-/* UI refs */
-const frame = $('#frame'), startBtn = $('#startBtn'), typing = $('#typing');
+/* UI references */
+const frame = $('#frame'), leftPane = $('#leftPane');
+const startBtn = $('#startBtn'), typing = $('#typing');
 const chatArea = $('#chatArea'), gameArea = $('#gameArea'), dropArea = $('#dropArea');
 const savedBar = $('#savedBar'), scoreBox = $('#scoreBox');
 const openGalleryBtn = $('#openGallery'), galleryModal = $('#galleryModal'), galleryGrid = $('#galleryGrid'), closeGalleryBtn = $('#closeGallery');
 const viewer = $('#viewer'), viewerCard = $('#viewerCard'), closeViewer = $('#closeViewer');
-const finalWrap = $('#finalWrap'), romanticText = $('#romanticText'), heartContainer = $('#heartContainer'), heartBtn = $('#heartBtn'), finalVideo = $('#finalVideo');
+const finalWrap = $('#finalWrap'), romanticText = $('#romanticText'), heartContainer = $('#heartContainer'), heartSvgWrap = $('#heartSvgWrap'), finalVideo = $('#finalVideo');
 const lbTop = $('#lbTop'), lbBottom = $('#lbBottom');
 const clearSaved = $('#clearSaved');
 
-/* State */
+const musicEl = document.getElementById('music'), clickEl = document.getElementById('click');
+
 let activeMemories = [], spawnTimer = null, score = 0;
-let savedMemories = []; // intentionally in-memory only (cleared each page load)
-let audioCtx = null, musicSource = null, musicGain = null;
-const musicEl = document.getElementById('music');
-const clickEl = document.getElementById('click');
-let audioInitialized = false;
+let savedMemories = []; // in-memory for this session only
 
-/* Chat text replacements (user provided) */
-const storySequence = [
-  {who:'them', text:'приветки поля, я немного стесняюсь'},
-  {who:'them', text:'я может и просто бегущая строка - но я вижу как ты необычайно красива сегодня'},
-  {who:'them', text:'тут лёгенькая игра, нужно спасти несколько падающих прикольчиков'},
-  {who:'them', text:'просто тапай или перетаскивай'},
-  {who:'them', text:'готова? тык "начать"'}
-];
-
-/* Final (user text) */
-const FINAL_PARAGRAPHS = [
-`Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
-`Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
-`Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
-`Если бы я был слепым — ты была бы моим зрением.<br>Если бы я был глухим — ты была бы моим слухом.<br>Если бы я был немым — ты была бы моим голосом.`,
-`Если бы не было тебя — не было бы меня.<br><br>Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
-];
-
-/* Utilities */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-/* Cinematic entry */
-(async function cinematicEntry(){
-  lbTop.style.height='0px'; lbBottom.style.height='0px';
-  requestAnimationFrame(()=>{ lbTop.style.transition='height 480ms ease'; lbBottom.style.transition='height 480ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
-  await sleep(760);
-  await runChatIntro();
-  lbTop.style.height='0px'; lbBottom.style.height='0px';
-})();
-
-async function runChatIntro(){
-  chatArea.innerHTML = '';
-  for(let i=0;i<storySequence.length;i++){
-    typing.classList.remove('hidden');
-    await sleep(700 + Math.random()*350);
-    typing.classList.add('hidden');
-    await appendMessage(storySequence[i].who, storySequence[i].text);
-    await sleep(260);
-  }
-  startBtn.classList.remove('hidden');
-}
-
-async function appendMessage(who, text){
-  const el = document.createElement('div'); el.className = 'msg ' + (who==='me' ? 'me' : 'them');
-  el.innerHTML = `<div>${text}</div>`;
-  chatArea.appendChild(el);
-  chatArea.scrollTop = chatArea.scrollHeight;
-  el.style.opacity = 0; el.style.transform = 'translateY(8px)';
-  requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity = 1; el.style.transform = 'translateY(0)'; });
-}
-
-/* AUDIO: init WebAudio for gentle fade; user requested music -40% (target 0.6) and softer fade */
+/* AUDIO (WebAudio for smooth fade) */
+let audioCtx = null, musicSource = null, musicGain = null, audioInitialized = false;
 const MUSIC_TARGET = 0.6;
 const MUSIC_FADE_SEC = 2.4;
 
@@ -306,18 +334,14 @@ function initAudioOnce(){
   audioInitialized = true;
   try{
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if(musicEl){
-      musicSource = audioCtx.createMediaElementSource(musicEl);
-      musicGain = audioCtx.createGain();
-      musicGain.gain.value = 0.0;
-      musicSource.connect(musicGain).connect(audioCtx.destination);
-      musicEl.loop = true;
-    }
-  }catch(e){
-    console.warn('Audio init error', e);
-  }
+    musicSource = audioCtx.createMediaElementSource(musicEl);
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = 0.0;
+    musicSource.connect(musicGain).connect(audioCtx.destination);
+    musicEl.loop = true;
+  }catch(e){ console.warn('audio init', e); }
 }
-function fadeMusicTo(target = MUSIC_TARGET, time = MUSIC_FADE_SEC){
+function fadeMusicTo(target, time){
   if(!musicGain || !audioCtx) return;
   const now = audioCtx.currentTime;
   musicGain.gain.cancelScheduledValues(now);
@@ -331,27 +355,73 @@ function startMusic(){
     const p = musicEl.play();
     if(p && p.then) p.then(()=>{ fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC); }).catch(()=>{});
     else fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC);
-  }catch(e){ console.warn('startMusic error', e); }
-}
-function stopMusicImmediate(){
-  try{
-    if(musicGain && audioCtx){
-      const now = audioCtx.currentTime;
-      musicGain.gain.cancelScheduledValues(now);
-      musicGain.gain.setValueAtTime(musicGain.gain.value, now);
-      musicGain.gain.linearRampToValueAtTime(0.0, now + 0.8);
-      setTimeout(()=>{ try{ musicEl.pause(); }catch(e){} }, 900);
-    } else {
-      try{ musicEl.pause(); }catch(e){}
-    }
   }catch(e){}
 }
-function playClick(){
-  if(!clickEl) return;
-  try{ clickEl.currentTime = 0; clickEl.play().catch(()=>{}); }catch(e){}
+function softStopMusic(){
+  if(!musicGain || !audioCtx){ try{ musicEl.pause() }catch(e){}; return; }
+  const now = audioCtx.currentTime;
+  musicGain.gain.cancelScheduledValues(now);
+  musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+  musicGain.gain.linearRampToValueAtTime(0, now + 0.9);
+  setTimeout(()=>{ try{ musicEl.pause() }catch(e){} }, 1000);
+}
+function playClick(){ if(clickEl){ clickEl.currentTime = 0; clickEl.play().catch(()=>{}); } }
+
+/* helper */
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* Chat intro & cinematic bars */
+const storySequence = [
+  'приветки поля, я немного стесняюсь',
+  'я может и просто бегущая строка - но я вижу как ты необычайно красива сегодня',
+  'тут лёгенькая игра, нужно спасти несколько падающих прикольчиков',
+  'просто тапай или перетаскивай',
+  'готова? тык "начать"'
+];
+
+(async function entry(){
+  lbTop.style.height='0px'; lbBottom.style.height='0px';
+  requestAnimationFrame(()=>{ lbTop.style.transition='height 480ms ease'; lbBottom.style.transition='height 480ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
+  await sleep(760);
+  await runChatIntro();
+  lbTop.style.height='0px'; lbBottom.style.height='0px';
+})();
+
+async function runChatIntro(){
+  chatArea.innerHTML = '';
+  for(const t of storySequence){
+    typing.classList.remove('hidden');
+    await sleep(700 + Math.random()*300);
+    typing.classList.add('hidden');
+    appendChat('them', t);
+    await sleep(260);
+  }
+  startBtn.classList.remove('hidden');
+}
+function appendChat(who, text){
+  const el = document.createElement('div'); el.className = 'msg ' + (who==='me' ? 'me' : 'them'); el.innerHTML = `<div>${text}</div>`;
+  chatArea.appendChild(el); chatArea.scrollTop = chatArea.scrollHeight;
+  el.style.opacity = 0; el.style.transform = 'translateY(8px)'; requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity = 1; el.style.transform = 'translateY(0)'; });
 }
 
-/* Start button */
+/* Title per-letter wrap + staggered float */
+function wrapTitleLetters(){
+  const t = $('#title');
+  const txt = t.textContent.trim();
+  t.innerHTML = '';
+  for(let i=0;i<txt.length;i++){
+    const ch = document.createElement('span');
+    ch.textContent = txt[i];
+    ch.className = 'char';
+    ch.style.setProperty('--i', i);
+    // stagger animation speed slightly by delay
+    ch.style.animationDelay = `${(i % 10) * 0.06}s`;
+    t.appendChild(ch);
+  }
+}
+wrapTitleLetters();
+
+/* Start button behavior: init audio, start music, collapse left pane completely */
 startBtn.addEventListener('click', async ()=>{
   initAudioOnce();
   if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume().catch(()=>{});
@@ -359,17 +429,24 @@ startBtn.addEventListener('click', async ()=>{
 
   startBtn.disabled = true;
   startBtn.textContent = 'Идёт...';
-  await sleep(160);
-  await appendMessage('me','Окей — начинаем!');
+  await sleep(140);
+
+  appendChat('me','Окей — начинаем!');
+  // collapse left pane visually and then remove it from flow after animation
   frame.classList.add('collapsed');
+  leftPane.style.transition = 'opacity 420ms ease';
+  leftPane.style.opacity = '0';
+  // after layout animation completes (match frame transition time)
+  setTimeout(()=>{ leftPane.style.display = 'none'; }, 520);
+
   await sleep(420);
   initGame();
 });
 
-/* Game initialization & spawning */
+/* Game: spawn / falling / save */
 function initGame(){
   score = 0; updateScore();
-  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
+  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im=new Image(); im.src = m.content; }});
   spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
   spawnMemory();
   renderSavedBar();
@@ -378,36 +455,36 @@ function initGame(){
 function spawnMemory(){
   const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
   const node = document.createElement('div'); node.className = 'memory';
-  node.style.left = (6 + Math.random()*88) + '%'; node.style.top = '-160px';
+  node.style.left = (6 + Math.random()*88) + '%';
+  node.style.top = '-160px';
   node.tabIndex = 0;
-  if(template.type === 'img'){
-    const img = document.createElement('img'); img.src = template.content; img.alt = '';
-    node.appendChild(img);
-  } else {
-    const t = document.createElement('div'); t.style.padding='8px'; t.innerText = template.content; node.appendChild(t);
-  }
+
+  const img = document.createElement('img'); img.src = template.content; img.alt = '';
+  node.appendChild(img);
+
   gameArea.appendChild(node);
-  const memObj = { el: node, y: -160, id: Date.now()+Math.random(), meta: template };
-  activeMemories.push(memObj);
+  const mem = {el: node, y: -160, id: Date.now()+Math.random(), meta: template};
+  activeMemories.push(mem);
 
-  node.addEventListener('click',(e)=>{ e.stopPropagation(); saveMemory(memObj); });
-  node.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(memObj); });
+  node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(mem); });
+  node.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(mem); });
 
-  // drag
-  let dragging=false, startX=0, startY=0, offsetX=0, offsetY=0;
-  node.addEventListener('pointerdown',(ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; startX=ev.clientX; startY=ev.clientY; offsetX=parseFloat(node.style.left); offsetY=memObj.y; node.style.transition='transform 0s'; });
-  node.addEventListener('pointermove',(ev)=>{ if(!dragging) return; const dx = ev.clientX - startX; const dy = ev.clientY - startY; memObj.y = offsetY + dy; node.style.top = memObj.y + 'px'; node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)){ dropArea.style.borderColor='rgba(255,255,255,0.7)'; } else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
-  node.addEventListener('pointerup',(ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(memObj); });
+  // pointer drag
+  let dragging=false, sx=0, sy=0, ox=0, oy=0;
+  node.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; sx=ev.clientX; sy=ev.clientY; ox = parseFloat(node.style.left); oy=mem.y; node.style.transition='transform 0s'; });
+  node.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const dx = ev.clientX - sx; const dy = ev.clientY - sy; mem.y = oy + dy; node.style.top = mem.y + 'px'; node.style.left = Math.max(2, Math.min(92, ox + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)) dropArea.style.borderColor='rgba(255,255,255,0.7)'; else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
+  node.addEventListener('pointerup', (ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(mem); });
 
-  // little easter for pet images
-  if(template.type === 'img' && /pet/i.test(template.content)){
-    attachTripleTap(node, ()=> showPetEaster());
-  }
+  // small random rotation to make layout lively but keep image contained
+  node.style.transform = `rotate(${(Math.random()*6-3)}deg)`;
 }
 
-/* Falling ticker */
+/* ticker: move down */
 const ticker = setInterval(()=>{
-  activeMemories.forEach(m=>{ m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5)); if(m.el) m.el.style.top = (m.y) + 'px'; });
+  activeMemories.forEach(m=>{
+    m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5));
+    if(m.el) m.el.style.top = (m.y) + 'px';
+  });
   activeMemories = activeMemories.filter(m=>{
     if(!m.el) return false;
     const r = m.el.getBoundingClientRect();
@@ -418,14 +495,16 @@ const ticker = setInterval(()=>{
 
 function intersect(r1,r2){ return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top); }
 
-/* Save memory (in-memory only) */
-function saveMemory(memObj){
-  if(!memObj || !memObj.el) return;
-  memObj.el.style.transition='transform 320ms ease, opacity 320ms ease'; memObj.el.style.transform='scale(0.78) translateY(20px)'; memObj.el.style.opacity='0';
-  activeMemories = activeMemories.filter(m=>m.id !== memObj.id);
-  setTimeout(()=>{ try{ memObj.el.remove(); }catch(e){} }, 360);
+/* save memory (in-memory only), animate fly-out */
+function saveMemory(mem){
+  if(!mem || !mem.el) return;
+  mem.el.style.transition='transform 360ms cubic-bezier(.2,.9,.2,1), opacity 360ms';
+  mem.el.style.transform = 'scale(0.78) translateY(20px)';
+  mem.el.style.opacity = '0';
+  activeMemories = activeMemories.filter(m=>m.id !== mem.id);
+  setTimeout(()=>{ try{ mem.el.remove(); }catch(e){} }, 380);
 
-  const item = { type: memObj.meta.type, content: memObj.meta.content, when: Date.now() };
+  const item = {type:mem.meta.type, content:mem.meta.content, when:Date.now()};
   savedMemories.push(item);
   renderSavedBar();
 
@@ -437,7 +516,7 @@ function saveMemory(memObj){
 function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,107,143,0.04)'; setTimeout(()=>{ document.body.style.boxShadow=''; },260); }
 function updateScore(){ scoreBox.textContent = score; }
 
-/* Render saved thumbnails in HUD (last 6) */
+/* render saved thumbnails */
 function renderSavedBar(){
   savedBar.innerHTML = '';
   const list = savedMemories.slice(-6);
@@ -450,57 +529,52 @@ function renderSavedBar(){
   });
 }
 
-/* Final sequence: show romantic text (music keeps playing), then heart appears.
-   DO NOT stop music here — user presses heart to stop music and see final video. */
+/* final sequence: show romantic text then heart (music keeps playing) */
 async function triggerFinalSequence(){
   stopSpawning();
   await sleep(420);
   lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease';
   lbTop.style.height='72px'; lbBottom.style.height='72px';
   await sleep(520);
-  // show cinematic lines in chat
-  await appendMessage('them','Некоторые вещи невозможно удалить.');
+  appendChat('them','Некоторые вещи невозможно удалить.');
   await sleep(520);
-  await appendMessage('them','Особенно чувства.');
+  appendChat('them','Особенно чувства.');
   await sleep(720);
-  // reveal romantic overlay
-  await showRomanticOverlay();
-  // retract letterbox after overlay shown
-  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 1100);
-}
-function stopSpawning(){ clearInterval(spawnTimer); spawnTimer=null; }
 
-/* Show romantic overlay: animate paragraphs one by one, then show pulsing heart */
-async function showRomanticOverlay(){
+  // reveal romantic overlay: each paragraph appears with subtle animated entrance
   finalWrap.classList.add('active');
   romanticText.innerHTML = '';
-  // create paragraphs
   for(let i=0;i<FINAL_PARAGRAPHS.length;i++){
     const p = document.createElement('p'); p.innerHTML = FINAL_PARAGRAPHS[i];
     romanticText.appendChild(p);
-    // reveal with stagger
+    // stagger reveal
     await sleep(360);
     p.classList.add('visible');
-    await sleep(600);
+    await sleep(240);
   }
-  // show heart after small delay
+  // show heart after text
   await sleep(420);
   heartContainer.style.display = 'block';
+  // retract letterbox
+  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 1000);
 }
+function stopSpawning(){ clearInterval(spawnTimer); spawnTimer=null; }
 
-/* Heart click: stop music and show final video */
-heartBtn.addEventListener('click', async ()=>{
-  // stop music with soft fade
-  stopMusicImmediate();
-  // reveal final video
-  if(CONFIG.finalMedia && CONFIG.finalMedia.toLowerCase().endsWith('.mp4')){
-    finalVideo.src = CONFIG.finalMedia;
-    finalVideo.classList.remove('hidden');
-    try{ await finalVideo.play(); }catch(e){}
-  }
+/* heart click => stop music softly and show final video */
+heartSvgWrap.addEventListener('click', async ()=>{
+  // soft fade music and pause
+  softStopMusic();
+
+  // show final video element in overlay
+  finalVideo.style.display = 'block';
+  finalVideo.src = CONFIG.finalMedia;
+  try{ await finalVideo.play(); }catch(e){ /* user can press play */ }
+
+  // hide heart so video visible
+  heartContainer.style.display = 'none';
 });
 
-/* Gallery (in-memory only; cleared each visit) */
+/* gallery handlers (in-memory only) */
 openGalleryBtn.addEventListener('click', openGallery);
 closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; });
 function openGallery(){
@@ -511,7 +585,7 @@ function openGallery(){
     savedMemories.slice().reverse().forEach(item=>{
       const g = document.createElement('div'); g.className='thumb';
       const img = document.createElement('img'); img.src = item.content; g.appendChild(img);
-      const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = new Date(item.when).toLocaleString();
+      const cap = document.createElement('div'); cap.className='cap'; cap.textContent = new Date(item.when).toLocaleString();
       g.appendChild(cap);
       g.addEventListener('click', ()=> openViewer(item));
       galleryGrid.appendChild(g);
@@ -520,37 +594,38 @@ function openGallery(){
   galleryModal.classList.add('active'); galleryModal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
 }
 
-/* Viewer */
+/* viewer */
 function openViewer(item){
   viewerCard.innerHTML = '';
-  const wrap = document.createElement('div'); wrap.style.padding='0';
-  const content = document.createElement('div');
-  if(item.type === 'img'){ const img = document.createElement('img'); img.src = item.content; content.appendChild(img); }
-  else { const t = document.createElement('div'); t.style.padding='18px'; t.style.color='white'; t.textContent = item.content; content.appendChild(t); }
+  const wrap = document.createElement('div');
+  const img = document.createElement('img'); img.src = item.content;
+  wrap.appendChild(img);
   const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = new Date(item.when).toLocaleString();
-  wrap.appendChild(content); wrap.appendChild(meta); viewerCard.appendChild(wrap);
+  viewerCard.appendChild(wrap); viewerCard.appendChild(meta);
   viewer.classList.add('active'); viewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
-  wrap.style.transform='scale(.96)'; wrap.style.opacity='0';
-  requestAnimationFrame(()=>{ wrap.style.transition='transform 420ms ease, opacity 420ms ease'; wrap.style.transform='scale(1)'; wrap.style.opacity='1'; });
-  galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true');
 }
 closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; });
 
-/* Clear saved (in-memory) */
+/* clear saved in-memory */
 clearSaved.addEventListener('click', ()=>{ if(!confirm('Очистить все сохранённые моменты?')) return; savedMemories=[]; renderSavedBar(); alert('Готово — сохранения удалены.'); });
 
-/* simple easter helper */
+/* small easter for pet images */
 function attachTripleTap(node, cb){
   let taps = [];
   node.addEventListener('pointerdown', (e)=>{ const now = Date.now(); taps.push(now); taps = taps.filter(t => now - t < 1200); if(taps.length >= 3){ taps=[]; try{ cb(); }catch(e){} }});
 }
-function showPetEaster(){ const msg = document.createElement('div'); msg.style.position='fixed'; msg.style.top='14%'; msg.style.left='50%'; msg.style.transform='translateX(-50%)'; msg.style.padding='12px 16px'; msg.style.borderRadius='12px'; msg.style.background='linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))'; msg.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'; msg.style.zIndex='140'; msg.innerHTML = '<strong>Псс…</strong> милый питомец здесь :)'; document.body.appendChild(msg); setTimeout(()=>{ msg.style.transition='opacity 420ms ease'; msg.style.opacity=0; setTimeout(()=>msg.remove(),420); },2200); }
+function showPetEaster(){
+  const msg = document.createElement('div'); msg.style.position='fixed'; msg.style.top='14%'; msg.style.left='50%'; msg.style.transform='translateX(-50%)'; msg.style.padding='12px 16px'; msg.style.borderRadius='12px'; msg.style.background='linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))'; msg.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'; msg.style.zIndex='140'; msg.innerHTML = '<strong>Псс…</strong> милый питомец здесь :)'; document.body.appendChild(msg); setTimeout(()=>{ msg.style.transition='opacity 420ms ease'; msg.style.opacity=0; setTimeout(()=>msg.remove(),420); },2000);
+}
 
-/* Prevent overscroll while dragging */
+/* prevent overscroll while dragging */
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
 
-/* init UI */
-(function initUI(){ renderSavedBar(); /* avatar fallback handling */ const av = document.getElementById('avatarImg'); av.addEventListener('error', ()=>{ document.getElementById('avatarImg').style.display='none'; document.getElementById('avatarFallback').style.display='flex'; }); })();
+/* init UI: wrap title letters (done earlier) and handle avatar fallback */
+(function initUI(){
+  const av = document.getElementById('avatarImg');
+  av.addEventListener('error', ()=>{ av.style.display='none'; document.getElementById('avatarFallback').style.display='flex'; });
+})();
 </script>
 </body>
 </html>
