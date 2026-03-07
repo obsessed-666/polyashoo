@@ -3,134 +3,124 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Подарок — интерактив</title>
-<meta name="description" content="Интерактивный романтический лендинг: сообщения, игра, воспоминания, финал" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Подарок — интерактив (v2.1)</title>
+<meta name="description" content="Интерактивный романтический лендинг — чат, игра, галерея, финал" />
 <style>
 :root{
-  --bg:#030312;
-  --fg:#f5f5f7;
-  --muted:rgba(255,255,255,0.15);
-  --accent:#ff6b8f;
-  --glass: rgba(255,255,255,0.03);
-  --ui-radius:14px;
-  --shadow: 0 20px 80px rgba(0,0,0,0.65);
-  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --bg:#030312; --fg:#f6f6f6; --muted:rgba(255,255,255,0.14);
+  --accent:#ff6b8f; --glass:rgba(255,255,255,0.03); --shadow:0 20px 80px rgba(0,0,0,0.65);
+  --ui-radius:14px; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --safe-zone:92px;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;touch-action:manipulation}
 a{color:inherit}
-button{font-family:inherit}
-#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.9) saturate(1.02)}
+button{font-family:inherit;cursor:pointer}
+
+/* background video + overlay */
+#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.95);-webkit-transform:translateZ(0)}
 .overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1}
-.app{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
 
-/* Cinematic letterbox bars */
-.letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:0;background:#000;z-index:30;pointer-events:none}
-.letterbox-top{top:0}
-.letterbox-bottom{bottom:0}
+/* cinematic bars */
+.letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:0;background:#000;z-index:40;pointer-events:none}
+.letterbox-top{top:0} .letterbox-bottom{bottom:0}
 
-/* Main frame (center) */
-.frame{width:100%;max-width:1100px;height:80vh;max-height:760px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr}
+/* app shell */
+.app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
 
-/* Left: Telegram-like chat / intro */
-.left{
-  padding:18px;
-  border-right:1px solid rgba(255,255,255,0.02);
-  display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));
-}
+/* main frame: collapsible grid (left/chat | right/game) */
+.frame{width:100%;max-width:1120px;height:80vh;max-height:820px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:grid-template-columns .44s cubic-bezier(.2,.9,.2,1)}
+.frame.collapsed{grid-template-columns:0 1fr}
+
+/* left chat */
+.left{padding:18px;border-right:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));overflow:hidden}
 .header-left{display:flex;align-items:center;gap:12px}
 .avatar{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff9db5,#6bd0ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#09090a}
-.chat-area{flex:1;overflow:auto;padding-right:6px}
+.chat-area{flex:1;overflow:auto;padding-right:6px;-webkit-overflow-scrolling:touch}
 .msg{max-width:86%;padding:10px 12px;border-radius:14px;margin:8px 0;position:relative;line-height:1.35}
 .msg.me{margin-left:auto;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))}
 .msg.them{margin-right:auto;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
 .msg .small{font-size:12px;color:var(--muted);margin-top:6px;display:block}
-
-/* typing indicator */
 .typing{height:26px;display:flex;align-items:center;gap:6px;padding-left:6px}
 .dot{width:7px;height:7px;background:rgba(255,255,255,0.14);border-radius:50%;animation:blink 1200ms infinite}
-.dot:nth-child(2){animation-delay:160ms}
-.dot:nth-child(3){animation-delay:320ms}
+.dot:nth-child(2){animation-delay:160ms} .dot:nth-child(3){animation-delay:320ms}
 @keyframes blink{0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25}}
 
-/* Right: game + gallery */
+/* right game area */
 .right{position:relative;padding:18px;display:flex;flex-direction:column;gap:12px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .title{font-size:18px;font-weight:700}
 .hint{color:var(--muted);font-size:13px}
-
-/* HUD: score + saved */
 .hud{display:flex;align-items:center;gap:10px}
 .score{font-family:var(--mono);background:var(--glass);padding:8px 12px;border-radius:10px}
 .saved-row{display:flex;gap:8px;align-items:center}
 .saved-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform 160ms}
 .saved-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .saved-thumb:active{transform:scale(.96)}
+.btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:700}
+.btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--fg);padding:8px 12px}
 
-.game-wrap{flex:1;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.05));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+/* improved gallery button visual */
+.btn.secondary#openGallery{background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px}
+
+/* game wrap */
+.game-wrap{flex:1;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .game-canvas{position:absolute;inset:0;pointer-events:none;z-index:6}
 .game-stage{position:relative;width:100%;height:100%;display:block;pointer-events:none}
 
-/* floating polaroids / memories */
-.memory{
-  position:absolute;pointer-events:auto;user-select:none;touch-action:manipulation;
-  width:120px;height:120px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  box-shadow:0 18px 48px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 220ms ease,opacity 220ms;
-}
+/* memories (cards) */
+.memory{position:absolute;pointer-events:auto;user-select:none;touch-action:none;width:120px;height:120px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 18px 48px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 220ms ease,opacity 220ms}
 .memory img{width:100%;height:100%;object-fit:cover}
 .mem-label{position:absolute;left:8px;bottom:6px;font-size:11px;color:rgba(255,255,255,0.9)}
 
-/* drop safe area (bottom right) */
-.drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;z-index:7;font-family:var(--mono)}
+/* drop area */
+.drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:var(--mono);z-index:7}
 
-/* cinematic overlay effects */
+/* cinematic overlay & vignette */
 .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.25) 100%);z-index:8}
 
-/* gallery modal */
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:90;padding:20px}
+/* final wrap: hidden by default, becomes active on final */
+.final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:12px;text-align:left;opacity:0;pointer-events:none;z-index:80;transition:opacity .45s ease}
+.final-wrap.active{opacity:1;pointer-events:auto}
+.final-title{font-size:22px;font-weight:700}
+.final-text p{margin:12px 0;line-height:1.45}
+
+/* modal gallery & viewer */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:100;padding:18px}
 .modal.active{display:flex}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;max-width:1100px;width:100%;max-height:84vh;overflow:auto;padding:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;max-width:1100px;width:100%;max-height:84vh;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
 .thumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 18px 48px rgba(0,0,0,0.6);cursor:pointer;position:relative;transition:transform .22s}
 .thumb img{width:100%;height:120px;object-fit:cover;display:block}
 .thumb .cap{padding:8px;color:var(--muted);font-size:13px}
 
 /* viewer */
-.viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);z-index:100;padding:20px}
+.viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);z-index:120;padding:20px}
 .viewer.active{display:flex}
 .viewer .card{max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18));box-shadow:0 40px 140px rgba(0,0,0,0.8)}
 .viewer img,.viewer video{width:100%;height:auto;display:block}
 .viewer .meta{padding:12px;color:var(--muted);font-size:13px}
 
-/* final cinematic scene (full right area) */
-.final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:12px;text-align:left;opacity:0;pointer-events:none}
-.final-wrap.active{opacity:1;pointer-events:auto;transition:opacity .5s ease}
-.final-title{font-size:22px;font-weight:700}
-.final-text p{margin:12px 0;line-height:1.45}
-
-/* small */
-.hidden{display:none!important}
-@media(max-width:980px){ .frame{grid-template-columns:1fr} .left{order:2} .right{order:1} .frame{height:88vh} }
+/* responsive */
+@media (max-width:980px){ .frame{grid-template-columns:1fr} .left{order:2} .right{order:1} .frame{height:88vh} .drop-area{right:12px;left:12px;width:auto} }
 </style>
 </head>
 <body>
 
-<!-- Background video - name must be bg.mp4 and be in same folder as index.html -->
-<video id="bg-video" autoplay muted loop playsinline>
+<!-- bg video: name must be bg.mp4 in same folder as index.html -->
+<video id="bg-video" autoplay muted loop playsinline playsinline webkit-playsinline>
   <source src="bg.mp4" type="video/mp4">
-  <!-- fallback color if video fails -->
 </video>
-
 <div class="overlay" aria-hidden="true"></div>
 
-<!-- cinematic top/bottom bars (grow on entry) -->
 <div class="letterbox-top" id="lbTop"></div>
 <div class="letterbox-bottom" id="lbBottom"></div>
 
 <div class="app" role="application" aria-label="Интерактивный подарок">
-  <div class="frame" role="region">
+  <div class="frame" id="frame">
 
-    <!-- LEFT: Chat / intro -->
-    <div class="left" aria-label="Сообщения">
+    <!-- LEFT: chat -->
+    <div class="left" id="leftPane" aria-label="Сообщения">
       <div class="header-left">
         <div class="avatar">P</div>
         <div>
@@ -139,28 +129,25 @@ button{font-family:inherit}
         </div>
       </div>
 
-      <div class="chat-area" id="chatArea" aria-live="polite">
-        <!-- messages will be inserted here -->
-      </div>
+      <div class="chat-area" id="chatArea" aria-live="polite"></div>
 
       <div style="display:flex;align-items:center;gap:8px">
-        <div class="typing hidden" id="typing">
-          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        </div>
-        <button id="startBtn" class="btn">Начать</button>
+        <div class="typing hidden" id="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <button class="btn" id="startBtn">Начать</button>
       </div>
     </div>
 
-    <!-- RIGHT: Game + final -->
-    <div class="right" aria-label="Игровая сцена">
+    <!-- RIGHT: game -->
+    <div class="right" id="rightPane" aria-label="Игровая сцена">
       <div class="topbar">
         <div>
           <div class="title">Спаси моменты</div>
-          <div class="hint">Тапни на карточку или перетащи в зону справа внизу</div>
+          <div class="hint">Тапни на карточку или перетащи в зону</div>
         </div>
+
         <div class="hud">
           <div class="score" id="scoreBox">0</div>
-          <div class="saved-row" id="savedBar"></div>
+          <div class="saved-row" id="savedBar" aria-hidden="false"></div>
           <button class="btn secondary" id="openGallery">Галерея</button>
         </div>
       </div>
@@ -169,7 +156,6 @@ button{font-family:inherit}
         <div class="game-canvas" id="gameArea"></div>
         <div class="drop-area" id="dropArea">Перетащи сюда — сохранить</div>
 
-        <!-- final cinematic text + video area (overlay) -->
         <div class="final-wrap" id="finalWrap" aria-hidden="true">
           <div class="final-title" id="finalTitle">Ничто не исчезнет полностью</div>
           <div class="final-text" id="finalText"></div>
@@ -183,7 +169,7 @@ button{font-family:inherit}
         <div class="vignette" aria-hidden="true"></div>
       </div>
 
-      <div class="controls" style="display:flex;justify-content:flex-end;gap:10px;padding-top:10px">
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:10px">
         <button class="btn secondary" id="clearSaved">Очистить</button>
       </div>
     </div>
@@ -191,23 +177,20 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- Gallery modal -->
+<!-- gallery modal -->
 <div class="modal" id="galleryModal" aria-hidden="true">
   <div class="grid" id="galleryGrid"></div>
   <button class="btn" id="closeGallery" style="position:fixed;left:18px;top:18px">Закрыть</button>
 </div>
 
-<!-- Viewer -->
+<!-- viewer -->
 <div class="viewer" id="viewer" aria-hidden="true">
   <div class="viewer-close" id="closeViewer" style="position:fixed;right:18px;top:18px;background:rgba(0,0,0,0.45);padding:10px;border-radius:12px;cursor:pointer">✕</div>
   <div class="card" id="viewerCard" style="max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden"></div>
 </div>
 
 <script>
-/* ================== CONFIG (файлы/подписи) ==================
- - Помести свои изображения рядом с index.html под этими именами
- - bg.mp4 уже используется выше (10s loop). final.mp4 — финальное видео.
-===========================================================*/
+/* ====== CONFIG: укажи имена файлов, подписи и настройки ====== */
 const CONFIG = {
   memories:[
     {type:'img', content:'mem1.jpg', label:'Первое фото'},
@@ -224,58 +207,26 @@ const CONFIG = {
   finalMedia:'final.mp4',
   storageKey:'gift_v2_saved'
 };
-/* ============================================================== */
+/* =========================================================== */
 
-/* Helpful selectors */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
-/* UI references */
-const chatArea = $('#chatArea');
-const startBtn = $('#startBtn');
-const typing = $('#typing');
-const gameArea = $('#gameArea');
-const dropArea = $('#dropArea');
-const savedBar = $('#savedBar');
-const scoreBox = $('#scoreBox');
-const openGalleryBtn = $('#openGallery');
-const galleryModal = $('#galleryModal');
-const galleryGrid = $('#galleryGrid');
-const closeGalleryBtn = $('#closeGallery');
-const viewer = $('#viewer');
-const viewerCard = $('#viewerCard');
-const closeViewer = $('#closeViewer');
-const finalWrap = $('#finalWrap');
-const finalTextEl = $('#finalText');
-const finalVideo = $('#finalVideo');
-const replayBtn = $('#replayBtn');
-const writeBtn = $('#writeBtn');
+/* UI elements */
+const frame = $('#frame'), leftPane = $('#leftPane'), rightPane = $('#rightPane');
+const chatArea = $('#chatArea'), typing = $('#typing'), startBtn = $('#startBtn');
+const gameArea = $('#gameArea'), dropArea = $('#dropArea');
+const savedBar = $('#savedBar'), scoreBox = $('#scoreBox');
+const openGalleryBtn = $('#openGallery'), galleryModal = $('#galleryModal'), galleryGrid = $('#galleryGrid'), closeGalleryBtn = $('#closeGallery');
+const viewer = $('#viewer'), viewerCard = $('#viewerCard'), closeViewer = $('#closeViewer');
+const finalWrap = $('#finalWrap'), finalTextEl = $('#finalText'), finalVideo = $('#finalVideo');
 const lbTop = $('#lbTop'), lbBottom = $('#lbBottom');
-const clearSaved = $('#clearSaved');
+const clearSaved = $('#clearSaved'), replayBtn = $('#replayBtn'), writeBtn = $('#writeBtn');
 
 /* State */
-let activeMemories = [];
-let spawnTimer = null;
-let score = 0;
+let activeMemories = [], spawnTimer = null, score = 0;
 let savedMemories = loadSaved(CONFIG.storageKey) || [];
-let chatIndex = 0;
-let storySequence = []; // messages sequence
-
-/* final user text paragraphs (can be changed) */
-const FINAL_PARAGRAPHS = [
-`Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
-`Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
-`Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
-`Если бы я был слепым — ты была бы моим зрением.
-Если бы я был глухим — ты была бы моим слухом.
-Если бы я был немым — ты была бы моим голосом.`,
-`Если бы не было тебя — не было бы меня.
-
-Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
-];
-
-/* Pre-built chat script (assistant-generated lines). You can edit these later. */
-storySequence = [
+let storySequence = [
   {who:'them', text:'Привет. Я немного нервничаю.'},
   {who:'them', text:'Решил сделать маленький подарок — это займет минуту.'},
   {who:'them', text:'Тут лёгкая игра: нужно сохранить пару моментов.'},
@@ -283,341 +234,198 @@ storySequence = [
   {who:'them', text:'Готов? Нажми «Начать».'}
 ];
 
-/* ---------- Helper utilities ---------- */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function rand(min,max){ return min + Math.random()*(max-min) }
-
-/* ---------- Cinematic entry: animate letterbox ---------- */
+/* cinematic entry */
 (async function cinematicEntry(){
-  // animate letterbox bars (grow to 72px then hide)
-  lbTop.style.height = '0px';
-  lbBottom.style.height = '0px';
-  // fast grow
+  lbTop.style.height='0px'; lbBottom.style.height='0px';
   requestAnimationFrame(()=>{ lbTop.style.transition='height 480ms ease'; lbBottom.style.transition='height 480ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
-  await sleep(900);
-  // show chat intro lines
+  await sleep(820);
   await runChatIntro();
-  // shrink bars
+  // collapse letterbox smoothly
   lbTop.style.height='0px'; lbBottom.style.height='0px';
 })();
 
-/* ---------- Chat: render messages sequentially ---------- */
+/* chat intro */
 async function runChatIntro(){
-  chatArea.innerHTML = '';
+  chatArea.innerHTML='';
   for(let i=0;i<storySequence.length;i++){
-    const m = storySequence[i];
-    await showTyping();
-    await appendMessage(m.who, m.text);
-    await sleep(420);
+    typing.classList.remove('hidden');
+    await sleep(700 + Math.random()*350);
+    typing.classList.add('hidden');
+    await appendMessage(storySequence[i].who, storySequence[i].text);
+    await sleep(260);
   }
-  typing.classList.add('hidden');
   startBtn.classList.remove('hidden');
 }
 
-/* show typing animation for ~700-1000ms */
-async function showTyping(){
-  typing.classList.remove('hidden');
-  await sleep(800 + Math.random()*400);
-  typing.classList.add('hidden');
-}
-
-/* append message to chat */
+/* append message */
 async function appendMessage(who, text){
-  const el = document.createElement('div');
-  el.className = 'msg ' + (who === 'me' ? 'me' : 'them');
+  const el = document.createElement('div'); el.className='msg ' + (who==='me' ? 'me' : 'them');
   el.innerHTML = `<div>${text}</div>`;
   chatArea.appendChild(el);
   chatArea.scrollTop = chatArea.scrollHeight;
-  // small pop-in
-  el.style.opacity = 0; el.style.transform = 'translateY(8px)';
+  el.style.opacity=0; el.style.transform='translateY(8px)';
   requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; });
-  return;
 }
 
-/* ---------- Start button behaviour (start game) ---------- */
+/* start button -> collapse left pane & init game */
 startBtn.addEventListener('click', async ()=>{
   startBtn.disabled = true;
   startBtn.textContent = 'Идёт...';
   await sleep(180);
-  startBtn.classList.add('hidden');
-  // add a "me" message acknowledging
-  await appendMessage('me', 'Окей — начинаем!');
+  // add a 'me' message
+  await appendMessage('me','Окей — начинаем!');
+  // collapse left with smooth layout change
+  frame.classList.add('collapsed');
+  // small delay to let collapse animation run
+  await sleep(420);
+  // initialize game
   initGame();
 });
 
-/* ---------- Game system: spawn falling memory cards ---------- */
+/* initialize game */
 function initGame(){
   score = 0; updateScore();
-  // preload
-  CONFIG.memories.forEach(m => { if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
+  // preload images
+  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
   spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
   spawnMemory();
   renderSavedBar();
 }
 
-/* spawn one memory node */
+/* spawn memory card */
 function spawnMemory(){
   const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
-  const node = document.createElement('div');
-  node.className = 'memory';
-  node.style.left = (6 + Math.random()*88) + '%';
-  node.style.top = '-140px';
+  const node = document.createElement('div'); node.className='memory';
+  node.style.left = (6 + Math.random()*88) + '%'; node.style.top = '-160px';
   node.tabIndex = 0;
-  // add content
-  if(template.type === 'img'){
-    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || '';
-    node.appendChild(img);
-    const lab = document.createElement('div'); lab.className = 'mem-label'; lab.innerText = template.label || '';
-    node.appendChild(lab);
+  if(template.type==='img'){
+    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || ''; node.appendChild(img);
+    const lab = document.createElement('div'); lab.className='mem-label'; lab.innerText = template.label || ''; node.appendChild(lab);
   } else {
     const t = document.createElement('div'); t.style.padding='8px'; t.innerText = template.content; node.appendChild(t);
   }
   gameArea.appendChild(node);
-  const memObj = {el:node, y:-140, id:Date.now()+Math.random(), meta:template};
+  const memObj = {el:node, y:-160, id:Date.now()+Math.random(), meta:template};
   activeMemories.push(memObj);
 
   // click to save
-  node.addEventListener('click',(e)=>{ e.stopPropagation(); saveMemory(memObj); });
+  node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(memObj); });
+  node.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(memObj); });
 
-  // pointer drag support
-  let dragging=false, startX=0, startY=0, offsetY=0, offsetX=0;
-  node.addEventListener('pointerdown', (ev)=>{
-    ev.preventDefault();
-    node.setPointerCapture(ev.pointerId);
-    dragging = true;
-    startX = ev.clientX; startY = ev.clientY;
-    offsetX = parseFloat(node.style.left);
-    offsetY = memObj.y;
-    node.style.transition = 'transform 0s';
-  });
-  node.addEventListener('pointermove', (ev)=>{
-    if(!dragging) return;
-    const dx = ev.clientX - startX;
-    const dy = ev.clientY - startY;
-    memObj.y = offsetY + dy;
-    node.style.top = memObj.y + 'px';
-    node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%';
-    const zoneRect = document.getElementById('dropArea').getBoundingClientRect();
-    const nRect = node.getBoundingClientRect();
-    if(intersect(zoneRect, nRect)){ $('#dropArea').style.borderColor = 'rgba(255,255,255,0.7)'; }
-    else { $('#dropArea').style.borderColor = 'rgba(255,255,255,0.06)'; }
-  });
-  node.addEventListener('pointerup', (ev)=>{
-    dragging = false;
-    node.releasePointerCapture && node.releasePointerCapture(ev.pointerId);
-    node.style.transition = '';
-    const zoneRect = document.getElementById('dropArea').getBoundingClientRect();
-    const nRect = node.getBoundingClientRect();
-    $('#dropArea').style.borderColor = 'rgba(255,255,255,0.06)';
-    if(intersect(zoneRect, nRect)) saveMemory(memObj);
-  });
+  // drag support
+  let dragging=false, startX=0, startY=0, offsetX=0, offsetY=0;
+  node.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; startX=ev.clientX; startY=ev.clientY; offsetX=parseFloat(node.style.left); offsetY=memObj.y; node.style.transition='transform 0s'; });
+  node.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const dx = ev.clientX - startX; const dy = ev.clientY - startY; memObj.y = offsetY + dy; node.style.top = memObj.y + 'px'; node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)){ dropArea.style.borderColor='rgba(255,255,255,0.7)'; } else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
+  node.addEventListener('pointerup', (ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(memObj); });
 }
 
-/* falling motion */
+/* falling ticker */
 const ticker = setInterval(()=>{
-  activeMemories.forEach(m=>{
-    m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5));
-    if(m.el) m.el.style.top = (m.y) + 'px';
-  });
+  activeMemories.forEach(m=>{ m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5)); if(m.el) m.el.style.top = (m.y) + 'px'; });
   activeMemories = activeMemories.filter(m=>{
     if(!m.el) return false;
     const r = m.el.getBoundingClientRect();
-    if(r.top > window.innerHeight + 120){
-      try{ m.el.remove(); }catch(e){}
-      return false;
-    }
+    if(r.top > window.innerHeight + 120){ try{ m.el.remove(); }catch(e){}; return false; }
     return true;
   });
 }, CONFIG.tickInterval);
 
-/* helper intersection */
-function intersect(r1,r2){
-  return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
-}
+function intersect(r1,r2){ return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top); }
 
-/* save memory -> animate into saved bar & persist */
+/* save memory -> animate to saved, persist */
 function saveMemory(memObj){
   if(!memObj || !memObj.el) return;
-  // animate out
-  memObj.el.style.transition = 'transform 320ms ease, opacity 320ms ease';
-  memObj.el.style.transform = 'scale(0.78) translateY(20px)';
-  memObj.el.style.opacity = '0';
-  activeMemories = activeMemories.filter(m => m.id !== memObj.id);
+  memObj.el.style.transition='transform 320ms ease, opacity 320ms ease'; memObj.el.style.transform='scale(0.78) translateY(20px)'; memObj.el.style.opacity='0';
+  activeMemories = activeMemories.filter(m=>m.id !== memObj.id);
   setTimeout(()=>{ try{ memObj.el.remove(); }catch(e){} }, 360);
 
-  // push to saved list
   const item = { type: memObj.meta.type, content: memObj.meta.content, label: memObj.meta.label || '', when: Date.now() };
   savedMemories.push(item);
   persistSaved(CONFIG.storageKey, savedMemories);
   renderSavedBar();
-
-  // small visual & sound feedback
   flash();
-  score++;
-  updateScore();
-
-  // if reached required number show final cinematic
-  if(score >= CONFIG.requiredToWin){
-    triggerFinalSequence();
-  }
+  score++; updateScore();
+  if(score >= CONFIG.requiredToWin) triggerFinalSequence();
 }
-
-function flash(){
-  document.body.style.transition = 'box-shadow 220ms ease';
-  document.body.style.boxShadow = 'inset 0 0 160px rgba(255,120,150,0.04)';
-  setTimeout(()=>{ document.body.style.boxShadow = ''; }, 260);
-}
+function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,120,150,0.04)'; setTimeout(()=>{ document.body.style.boxShadow=''; },260); }
 function updateScore(){ scoreBox.textContent = score; }
 
 /* render saved thumbs in HUD */
 function renderSavedBar(){
-  savedBar.innerHTML = '';
-  const list = savedMemories.slice(-6);
-  list.forEach(item=>{
-    const el = document.createElement('div'); el.className = 'saved-thumb';
-    if(item.type === 'img'){
-      const img = document.createElement('img'); img.src = item.content; img.alt = item.label || '';
-      el.appendChild(img);
-    } else {
-      el.textContent = item.label || item.content;
-      el.style.padding = '6px';
-      el.style.fontSize = '12px';
-    }
-    el.addEventListener('click', ()=> openViewer(item));
-    savedBar.appendChild(el);
-  });
+  savedBar.innerHTML=''; const list = savedMemories.slice(-6);
+  list.forEach(item=>{ const el = document.createElement('div'); el.className='saved-thumb'; if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; el.appendChild(img); } else { el.textContent = item.label || item.content; el.style.padding='6px'; el.style.fontSize='12px'; } el.addEventListener('click', ()=> openViewer(item)); savedBar.appendChild(el); });
 }
 
-/* persist/load */
+/* persist/load helpers */
 function persistSaved(key, arr){ try{ localStorage.setItem(key, JSON.stringify(arr)); }catch(e){} }
 function loadSaved(key){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : []; }catch(e){ return []; } }
 
-/* ---------- Final cinematic sequence ---------- */
+/* final cinematic */
 async function triggerFinalSequence(){
-  // stop spawning
   stopSpawning();
-  // small pause
-  await sleep(500);
-  // gentle letterbox in
+  await sleep(420);
   lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease';
   lbTop.style.height='72px'; lbBottom.style.height='72px';
   await sleep(700);
-  // show cinematic lead text in chat then reveal final
-  await appendMessage('them', 'Некоторые вещи невозможно удалить.');
+  await appendMessage('them','Некоторые вещи невозможно удалить.');
   await sleep(600);
-  await appendMessage('them', 'Особенно чувства.');
-  await sleep(900);
-  // reveal final wrap (text + video)
+  await appendMessage('them','Особенно чувства.');
+  await sleep(700);
   showFinal();
-  // retract letterbox slowly
-  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 1200);
+  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; },1200);
 }
+function stopSpawning(){ clearInterval(spawnTimer); spawnTimer=null; }
 
-function stopSpawning(){ clearInterval(spawnTimer); spawnTimer = null; }
-
-/* show final: place video and paragraphs */
+/* show final: text + video */
 function showFinal(){
-  finalWrap.classList.add('active');
-  finalTextEl.innerHTML = '';
-  // set final text paragraphs gradually
+  finalWrap.classList.add('active'); finalTextEl.innerHTML='';
   (async ()=>{
-    for(let p of FINAL_PARAGRAPHS){
-      const el = document.createElement('p'); el.innerHTML = p.replace(/\n/g,'<br>');
-      el.style.opacity = 0; el.style.transform = 'translateY(8px)';
-      finalTextEl.appendChild(el);
-      requestAnimationFrame(()=>{ el.style.transition='opacity 420ms ease, transform 420ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; });
-      await sleep(900);
-    }
+    for(const p of FINAL_PARAGRAPHS){ const el=document.createElement('p'); el.innerHTML = p.replace(/\n/g,'<br>'); el.style.opacity=0; el.style.transform='translateY(8px)'; finalTextEl.appendChild(el); requestAnimationFrame(()=>{ el.style.transition='opacity 420ms ease, transform 420ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; }); await sleep(900); }
   })();
-
-  // if final video exists, attach and play
-  if(CONFIG.finalMedia && CONFIG.finalMedia.toLowerCase().endsWith('.mp4')){
-    finalVideo.src = CONFIG.finalMedia;
-    finalVideo.classList.remove('hidden');
-    finalVideo.play().catch(()=>{ /* autoplay blocked; user can press play */ });
-  }
+  if(CONFIG.finalMedia && CONFIG.finalMedia.toLowerCase().endsWith('.mp4')){ finalVideo.src = CONFIG.finalMedia; finalVideo.classList.remove('hidden'); finalVideo.play().catch(()=>{}); }
 }
 
-/* replay final */
-replayBtn.addEventListener('click', ()=>{ if(finalVideo.src){ finalVideo.currentTime = 0; finalVideo.play().catch(()=>{}); } });
+/* replay final & write button */
+replayBtn.addEventListener('click', ()=>{ if(finalVideo.src){ finalVideo.currentTime=0; finalVideo.play().catch(()=>{});} });
+writeBtn.addEventListener('click', ()=>{ const mail = prompt('Введите e-mail (оставьте пустым чтобы пропустить)'); if(mail && mail.trim()) window.location.href = 'mailto:' + encodeURIComponent(mail) + '?subject=Привет'; });
 
-/* write button -> mailto if configured */
-writeBtn.addEventListener('click', ()=>{
-  const mail = prompt('Введите e-mail (или оставьте пустым, если не хотите)');
-  if(mail && mail.trim().length){
-    window.location.href = 'mailto:' + encodeURIComponent(mail) + '?subject=Привет';
-  } else {
-    alert('Можешь написать позже :)');
-  }
-});
-
-/* ---------- Gallery modal & viewer ---------- */
+/* gallery */
 openGalleryBtn.addEventListener('click', openGallery);
-closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); });
+closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; });
 function openGallery(){
   galleryGrid.innerHTML = '';
-  if(savedMemories.length === 0){
-    const n = document.createElement('div'); n.className='muted'; n.style.padding='20px'; n.textContent = 'Пока ничего — сначала сохрани пару моментов.';
-    galleryGrid.appendChild(n);
-  } else {
-    savedMemories.slice().reverse().forEach(item=>{
-      const g = document.createElement('div'); g.className = 'thumb';
-      if(item.type === 'img'){
-        const img = document.createElement('img'); img.src = item.content; g.appendChild(img);
-      } else {
-        const t = document.createElement('div'); t.style.padding='12px'; t.textContent = item.label || item.content; g.appendChild(t);
-      }
-      const caption = document.createElement('div'); caption.className='cap'; caption.textContent = item.label || new Date(item.when).toLocaleString();
-      g.appendChild(caption);
-      g.addEventListener('click', ()=> openViewer(item));
-      galleryGrid.appendChild(g);
-    });
-  }
-  galleryModal.classList.add('active');
-  galleryModal.setAttribute('aria-hidden','false');
+  if(savedMemories.length===0){ const n=document.createElement('div'); n.className='muted'; n.style.padding='20px'; n.textContent='Пока пусто — сначала сохрани пару моментов.'; galleryGrid.appendChild(n); }
+  else{ savedMemories.slice().reverse().forEach(item=>{ const g=document.createElement('div'); g.className='thumb'; if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; g.appendChild(img); } else { const t=document.createElement('div'); t.style.padding='12px'; t.textContent=item.label||item.content; g.appendChild(t); } const cap = document.createElement('div'); cap.className='cap'; cap.textContent = item.label || new Date(item.when).toLocaleString(); g.appendChild(cap); g.addEventListener('click', ()=> openViewer(item)); galleryGrid.appendChild(g); }); }
+  galleryModal.classList.add('active'); galleryModal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
 }
 
-/* viewer open */
+/* viewer */
 function openViewer(item){
-  // clear
-  viewerCard.innerHTML = '';
-  const wrap = document.createElement('div'); wrap.style.padding = '0';
-  const content = document.createElement('div'); content.className = 'content';
-  if(item.type === 'img'){
-    const img = document.createElement('img'); img.src = item.content; img.alt = item.label || '';
-    content.appendChild(img);
-  } else {
-    const t = document.createElement('div'); t.style.padding = '18px'; t.style.color='white'; t.textContent = item.content; content.appendChild(t);
-  }
-  const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = (item.label ? item.label + ' — ' : '') + new Date(item.when).toLocaleString();
-  wrap.appendChild(content); wrap.appendChild(meta);
-  viewerCard.appendChild(wrap);
-  viewer.classList.add('active');
-  viewer.setAttribute('aria-hidden','false');
-  // animate
-  wrap.style.transform = 'scale(.96)'; wrap.style.opacity = '0';
-  requestAnimationFrame(()=>{ wrap.style.transition='transform 420ms ease, opacity 420ms ease'; wrap.style.transform='scale(1)'; wrap.style.opacity='1'; });
-  // close gallery if open
-  galleryModal.classList.remove('active');
-  galleryModal.setAttribute('aria-hidden','true');
+  viewerCard.innerHTML=''; const wrap=document.createElement('div'); wrap.style.padding='0'; const content=document.createElement('div'); if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; content.appendChild(img); } else { const t=document.createElement('div'); t.style.padding='18px'; t.style.color='white'; t.textContent=item.content; content.appendChild(t); } const meta = document.createElement('div'); meta.className='meta'; meta.textContent = (item.label ? item.label + ' — ' : '') + new Date(item.when).toLocaleString(); wrap.appendChild(content); wrap.appendChild(meta); viewerCard.appendChild(wrap); viewer.classList.add('active'); viewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; wrap.style.transform='scale(.96)'; wrap.style.opacity='0'; requestAnimationFrame(()=>{ wrap.style.transition='transform 420ms ease, opacity 420ms ease'; wrap.style.transform='scale(1)'; wrap.style.opacity='1'; }); galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true');
 }
-closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML = ''; });
+closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; });
 
-/* ---------- Clear saved ---------- */
-clearSaved.addEventListener('click', ()=>{
-  if(!confirm('Очистить все сохранённые моменты?')) return;
-  savedMemories = []; persistSaved(CONFIG.storageKey, savedMemories); renderSavedBar(); alert('Готово — сохранения удалены.');
-});
+/* clear saved */
+clearSaved.addEventListener('click', ()=>{ if(!confirm('Очистить все сохранённые моменты?')) return; savedMemories=[]; persistSaved(CONFIG.storageKey, savedMemories); renderSavedBar(); alert('Готово — сохранения удалены.'); });
 
-/* ---------- Helpers ---------- */
-// Prevent overscroll on mobile while dragging
+/* helpers */
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function persistSaved(key,arr){ try{ localStorage.setItem(key, JSON.stringify(arr)); }catch(e){} }
+function loadSaved(key){ try{ const s=localStorage.getItem(key); return s ? JSON.parse(s) : []; }catch(e){ return []; } }
+
+/* Prevent overscroll while dragging */
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
 
-// Auto render savedBar
-(function initUI(){
-  renderSavedBar();
-})();
+/* init UI */
+(function initUI(){ renderSavedBar(); })();
 
+/* small helper: render saved bar used in HUD */
+function renderSavedBar(){ savedBar.innerHTML=''; const last=savedMemories.slice(-6); last.forEach(item=>{ const el=document.createElement('div'); el.className='saved-thumb'; if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; el.appendChild(img);} else { el.textContent=item.label||item.content; el.style.padding='6px'; el.style.fontSize='12px'; } el.addEventListener('click', ()=> openViewer(item)); savedBar.appendChild(el); }); }
+
+/* Accessibility: ESC closes modals */
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ if(viewer.classList.contains('active')){ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; } if(galleryModal.classList.contains('active')){ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; } } });
+
+/* End of script */
 </script>
 </body>
 </html>
