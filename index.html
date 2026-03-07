@@ -5,37 +5,40 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Интернет открыточка Полиночке</title>
-<meta name="description" content="Интерактивная открытка: чат, игра, галерея, финал" />
 <style>
 :root{
   --bg:#030312; --fg:#f6f6f6; --muted:rgba(255,255,255,0.14);
-  --accent:#ff6b8f; --glass:rgba(255,255,255,0.03); --shadow:0 20px 80px rgba(0,0,0,0.65);
-  --ui-radius:14px; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --accent:#ff6b8f; --glass:rgba(255,255,255,0.03); --shadow:0 22px 90px rgba(0,0,0,0.7);
+  --ui-radius:14px; --mono:ui-monospace, SFMono-Regular, Menlo, monospace;
   --safe-zone:92px;
+  --music-target:0.6;
+  --music-fade:2.4s;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;touch-action:manipulation}
-button{font-family:inherit;cursor:pointer}
+button{font-family:inherit;cursor:pointer;border:0}
 
-/* background video + overlay */
-#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.95)}
+/* Background video + overlay */
+#bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(0.92) saturate(1.02)}
 .overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,2,4,0.28), rgba(2,2,4,0.62));z-index:1}
 
-/* cinematic bars */
+/* Cinematic bars */
 .letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:0;background:#000;z-index:40;pointer-events:none}
 .letterbox-top{top:0} .letterbox-bottom{bottom:0}
 
-/* app shell */
+/* App shell */
 .app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
 
-/* main frame */
+/* Frame */
 .frame{width:100%;max-width:1120px;height:80vh;max-height:820px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow);overflow:hidden;position:relative;display:grid;grid-template-columns:420px 1fr;transition:grid-template-columns .44s cubic-bezier(.2,.9,.2,1)}
 .frame.collapsed{grid-template-columns:0 1fr}
 
-/* left chat */
+/* LEFT (chat) */
 .left{padding:18px;border-right:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));overflow:hidden}
 .header-left{display:flex;align-items:center;gap:12px}
-.avatar{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff9db5,#6bd0ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#09090a}
+.avatar-wrap{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff9db5,#6bd0ff);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar-fallback{font-weight:700;color:#09090a;font-size:20px}
 .chat-area{flex:1;overflow:auto;padding-right:6px;-webkit-overflow-scrolling:touch}
 .msg{max-width:86%;padding:10px 12px;border-radius:14px;margin:8px 0;position:relative;line-height:1.35}
 .msg.me{margin-left:auto;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))}
@@ -45,11 +48,11 @@ button{font-family:inherit;cursor:pointer}
 .dot:nth-child(2){animation-delay:160ms} .dot:nth-child(3){animation-delay:320ms}
 @keyframes blink{0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25}}
 
-/* right game */
+/* RIGHT */
 .right{position:relative;padding:18px;display:flex;flex-direction:column;gap:12px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.title{font-size:18px;font-weight:700}
-.hint{color:var(--muted);font-size:13px}
+.title{font-size:28px;font-weight:800;font-family: Georgia, "Times New Roman", Times, serif; text-align:center;letter-spacing:0.8px;text-transform:uppercase;color:#fff;text-shadow:0 6px 30px rgba(255,107,143,0.08);margin:0}
+.title-wrap{flex:1;display:flex;align-items:center;justify-content:center}
 .hud{display:flex;align-items:center;gap:10px}
 .score{font-family:var(--mono);background:var(--glass);padding:8px 12px;border-radius:10px}
 .saved-row{display:flex;gap:8px;align-items:center}
@@ -59,50 +62,56 @@ button{font-family:inherit;cursor:pointer}
 .btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:700}
 .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--fg);padding:8px 12px}
 
-/* improved gallery button */
-.btn.secondary#openGallery{background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px}
-
-/* game wrap */
+/* Game wrap */
 .game-wrap{flex:1;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .game-canvas{position:absolute;inset:0;pointer-events:none;z-index:6}
-.game-stage{position:relative;width:100%;height:100%;display:block;pointer-events:none}
-
-/* memories */
-.memory{position:absolute;pointer-events:auto;user-select:none;touch-action:none;width:120px;height:120px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 18px 48px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 220ms ease,opacity 220ms}
-.memory img{width:100%;height:100%;object-fit:cover}
-.mem-label{position:absolute;left:8px;bottom:6px;font-size:11px;color:rgba(255,255,255,0.9)}
-
-/* drop area */
 .drop-area{position:absolute;right:18px;bottom:18px;width:260px;height:84px;border-radius:12px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.06);pointer-events:none;font-family:var(--mono);z-index:7}
 
-/* final wrap */
-.final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:12px;text-align:center;opacity:0;pointer-events:none;z-index:80;transition:opacity .45s ease}
-.final-wrap.active{opacity:1;pointer-events:auto}
-.final-title{font-size:22px;font-weight:700}
-.final-text p{margin:12px 0;line-height:1.45}
+/* Memory card (no labels now) */
+.memory{position:absolute;pointer-events:auto;user-select:none;touch-action:none;width:120px;height:120px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 18px 48px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 220ms ease,opacity 220ms}
 
-/* modal gallery & viewer */
+/* Final overlay: romantic text + heart */
+.final-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px;gap:18px;text-align:center;opacity:0;pointer-events:none;z-index:80;transition:opacity .45s ease}
+.final-wrap.active{opacity:1;pointer-events:auto}
+.romantic{
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size:22px;
+  max-width:920px;
+  color:#fff;
+  line-height:1.45;
+  text-shadow:0 10px 30px rgba(0,0,0,0.6);
+  transform-origin:center;
+}
+.romantic p{margin:16px 0; opacity:0; transform: translateY(14px) scale(0.99); transition:opacity .6s ease, transform .6s cubic-bezier(.2,.9,.2,1)}
+.romantic p.visible{opacity:1; transform: translateY(0) scale(1)}
+
+/* Pulsing heart */
+.heart{
+  width:120px;height:120px;border-radius:999px;background:radial-gradient(circle at 30% 30%, #ff9db5, #ff6b8f);display:flex;align-items:center;justify-content:center;color:white;font-size:42px;box-shadow:0 20px 60px rgba(255,107,143,0.12);cursor:pointer;
+  animation:heartPulse 1.6s infinite;
+}
+@keyframes heartPulse{
+  0%{transform:scale(0.98); box-shadow:0 18px 50px rgba(255,107,143,0.08)}
+  50%{transform:scale(1.06); box-shadow:0 30px 80px rgba(255,107,143,0.16)}
+  100%{transform:scale(0.98)}
+}
+
+/* modal & viewer */
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.88);z-index:100;padding:18px}
 .modal.active{display:flex}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;max-width:1100px;width:100%;max-height:84vh;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
 .thumb{border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);box-shadow:0 18px 48px rgba(0,0,0,0.6);cursor:pointer;position:relative;transition:transform .22s}
 .thumb img{width:100%;height:120px;object-fit:cover;display:block}
-.thumb .cap{padding:8px;color:var(--muted);font-size:13px}
-
-/* viewer */
 .viewer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);z-index:120;padding:20px}
 .viewer.active{display:flex}
 .viewer .card{max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18));box-shadow:0 40px 140px rgba(0,0,0,0.8)}
-.viewer img,.viewer video{width:100%;height:auto;display:block}
-.viewer .meta{padding:12px;color:var(--muted);font-size:13px}
 
-/* responsive */
-@media (max-width:980px){ .frame{grid-template-columns:1fr} .left{order:2} .right{order:1} .frame{height:88vh} .drop-area{right:12px;left:12px;width:auto} }
+@media (max-width:980px){ .frame{grid-template-columns:1fr} .left{order:2} .right{order:1} .frame{height:88vh} .drop-area{right:12px;left:12px;width:auto} .title{font-size:22px} .heart{width:96px;height:96px;font-size:34px} .romantic{font-size:18px} }
 </style>
 </head>
 <body>
 
-<!-- bg video (must be bg.mp4) -->
+<!-- Background video -->
 <video id="bg-video" autoplay muted loop playsinline webkit-playsinline>
   <source src="bg.mp4" type="video/mp4">
 </video>
@@ -114,10 +123,14 @@ button{font-family:inherit;cursor:pointer}
 <div class="app" role="application" aria-label="Интерактивная открытка">
   <div class="frame" id="frame">
 
-    <!-- LEFT -->
+    <!-- LEFT: header with avatar image -->
     <div class="left" id="leftPane" aria-label="Сообщения">
       <div class="header-left">
-        <div class="avatar">P</div>
+        <div class="avatar-wrap" id="avatarWrap">
+          <!-- Put avatar.jpg in repo root. Fallback shows P -->
+          <img id="avatarImg" src="avatar.jpg" alt="P" onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'">
+          <div id="avatarFallback" class="avatar-fallback" style="display:none">P</div>
+        </div>
         <div>
           <div style="font-weight:700">Интернет открыточка Полиночке</div>
           <div class="hint" style="font-size:13px;color:var(--muted)">Лёгкий интерактивчик - котику позитивчик</div>
@@ -132,14 +145,10 @@ button{font-family:inherit;cursor:pointer}
       </div>
     </div>
 
-    <!-- RIGHT -->
+    <!-- RIGHT: title centered, HUD on right -->
     <div class="right" id="rightPane" aria-label="Игровая сцена">
       <div class="topbar">
-        <div>
-          <div class="title">Спаси моменты</div>
-          <div class="hint">тут лёгенькая игра, нужно спасти несколько падающих прикольчиков</div>
-        </div>
-
+        <div class="title-wrap"><div class="title">БОМБЁЖКА МИЛОТОЙ</div></div>
         <div class="hud">
           <div class="score" id="scoreBox">0</div>
           <div class="saved-row" id="savedBar" aria-hidden="false"></div>
@@ -151,14 +160,16 @@ button{font-family:inherit;cursor:pointer}
         <div class="game-canvas" id="gameArea"></div>
         <div class="drop-area" id="dropArea">Перетащи сюда — сохранить</div>
 
+        <!-- final overlay: romantic paragraphs & heart -->
         <div class="final-wrap" id="finalWrap" aria-hidden="true">
-          <div class="final-title" id="finalTitle">Ничто не исчезнет полностью</div>
-          <div class="final-text" id="finalText"></div>
-          <video id="finalVideo" class="hidden" playsinline controls style="width:100%;max-height:360px;border-radius:12px;overflow:hidden"></video>
-          <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="btn" id="replayBtn">Просмотреть снова</button>
-            <button class="btn" id="hugBtn">Обнять его</button>
+          <div class="romantic" id="romanticText" aria-hidden="true"></div>
+          <div id="heartContainer" style="display:none">
+            <div class="heart" id="heartBtn">❤</div>
+            <div style="margin-top:10px;color:var(--muted);font-size:13px">Нажми на сердце, чтобы продолжить</div>
           </div>
+
+          <!-- final video (hidden until heart click) -->
+          <video id="finalVideo" class="hidden" playsinline controls style="width:100%;max-height:420px;border-radius:12px;overflow:hidden"></video>
         </div>
 
         <div class="vignette" aria-hidden="true"></div>
@@ -172,73 +183,70 @@ button{font-family:inherit;cursor:pointer}
   </div>
 </div>
 
-<!-- gallery modal -->
+<!-- Gallery modal -->
 <div class="modal" id="galleryModal" aria-hidden="true">
   <div class="grid" id="galleryGrid"></div>
   <button class="btn" id="closeGallery" style="position:fixed;left:18px;top:18px">Закрыть</button>
 </div>
 
-<!-- viewer -->
+<!-- Viewer -->
 <div class="viewer" id="viewer" aria-hidden="true">
   <div class="viewer-close" id="closeViewer" style="position:fixed;right:18px;top:18px;background:rgba(0,0,0,0.45);padding:10px;border-radius:12px;cursor:pointer">✕</div>
   <div class="card" id="viewerCard" style="max-width:920px;width:92%;max-height:92vh;border-radius:12px;overflow:hidden"></div>
 </div>
 
-<!-- Audio elements (must exist in repo root) -->
+<!-- Audio -->
 <audio id="music" src="music.mp3" preload="auto" loop></audio>
 <audio id="click" src="click.mp3" preload="auto"></audio>
 
 <script>
-/* ========= CONFIG =========
- - Files already in your repo:
-   bg.mp4, click.mp3, final.mp4, mem1.jpg, mem2.jpg, mem3.jpg, music.mp3, pet1.jpg, pet2.jpg, pet3.jpg
- - We clear persisted gallery on each page load (so gallery is empty at visit start).
-===========================*/
+/* === CONFIG ===
+Files expected in repo root:
+  bg.mp4, music.mp3, click.mp3, final.mp4,
+  mem1.jpg, mem2.jpg, mem3.jpg, pet1.jpg, pet2.jpg, pet3.jpg,
+  avatar.jpg (avatar image name — put it in repo root)
+*/
 const CONFIG = {
   memories:[
-    {type:'img', content:'mem1.jpg', label:'Первое фото'},
-    {type:'img', content:'mem2.jpg', label:'Наш смех'},
-    {type:'img', content:'mem3.jpg', label:'Кофе вместе'},
-    {type:'img', content:'pet1.jpg', label:'Котик 1'},
-    {type:'img', content:'pet2.jpg', label:'Котик 2'},
-    {type:'img', content:'pet3.jpg', label:'Котик 3'}
+    {type:'img', content:'mem1.jpg'},
+    {type:'img', content:'mem2.jpg'},
+    {type:'img', content:'mem3.jpg'},
+    {type:'img', content:'pet1.jpg'},
+    {type:'img', content:'pet2.jpg'},
+    {type:'img', content:'pet3.jpg'}
   ],
-  requiredToWin:5,
-  spawnInterval:700,
-  fallSpeed:28,
-  tickInterval:28,
-  maxSimultaneous:4,
-  finalMedia:'final.mp4',
-  storageKey:'gift_v2_saved'
+  requiredToWin: 5,
+  spawnInterval: 700,
+  fallSpeed: 28,
+  tickInterval: 28,
+  maxSimultaneous: 4,
+  finalMedia: 'final.mp4',
+  storageKey: 'gift_v3_session' // we will NOT persist across visits
 };
-/* ========================= */
+/* =========== */
 
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
-/* UI */
+/* UI refs */
 const frame = $('#frame'), startBtn = $('#startBtn'), typing = $('#typing');
 const chatArea = $('#chatArea'), gameArea = $('#gameArea'), dropArea = $('#dropArea');
 const savedBar = $('#savedBar'), scoreBox = $('#scoreBox');
 const openGalleryBtn = $('#openGallery'), galleryModal = $('#galleryModal'), galleryGrid = $('#galleryGrid'), closeGalleryBtn = $('#closeGallery');
 const viewer = $('#viewer'), viewerCard = $('#viewerCard'), closeViewer = $('#closeViewer');
-const finalWrap = $('#finalWrap'), finalTextEl = $('#finalText'), finalVideo = $('#finalVideo');
+const finalWrap = $('#finalWrap'), romanticText = $('#romanticText'), heartContainer = $('#heartContainer'), heartBtn = $('#heartBtn'), finalVideo = $('#finalVideo');
 const lbTop = $('#lbTop'), lbBottom = $('#lbBottom');
-const clearSaved = $('#clearSaved'), replayBtn = $('#replayBtn'), hugBtn = $('#hugBtn');
+const clearSaved = $('#clearSaved');
 
 /* State */
 let activeMemories = [], spawnTimer = null, score = 0;
-/* Clear gallery persisted from previous visits (user requested: gallery reset each visit) */
-try { localStorage.removeItem(CONFIG.storageKey); } catch(e){}
-let savedMemories = []; // we'll keep in-memory during this visit only
-
-/* Audio (WebAudio) */
+let savedMemories = []; // intentionally in-memory only (cleared each page load)
 let audioCtx = null, musicSource = null, musicGain = null;
 const musicEl = document.getElementById('music');
 const clickEl = document.getElementById('click');
 let audioInitialized = false;
 
-/* Chat texts (user-provided replacements) */
+/* Chat text replacements (user provided) */
 const storySequence = [
   {who:'them', text:'приветки поля, я немного стесняюсь'},
   {who:'them', text:'я может и просто бегущая строка - но я вижу как ты необычайно красива сегодня'},
@@ -247,32 +255,29 @@ const storySequence = [
   {who:'them', text:'готова? тык "начать"'}
 ];
 
-/* Final paragraphs (unchanged user text) */
+/* Final (user text) */
 const FINAL_PARAGRAPHS = [
 `Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.`,
 `Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было.`,
 `Полгода назад я и представить не мог, что смогу полюбить кого-то так сильно как тебя.`,
-`Если бы я был слепым — ты была бы моим зрением.
-Если бы я был глухим — ты была бы моим слухом.
-Если бы я был немым — ты была бы моим голосом.`,
-`Если бы не было тебя — не было бы меня.
-
-Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
+`Если бы я был слепым — ты была бы моим зрением.<br>Если бы я был глухим — ты была бы моим слухом.<br>Если бы я был немым — ты была бы моим голосом.`,
+`Если бы не было тебя — не было бы меня.<br><br>Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.`
 ];
 
+/* Utilities */
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 /* Cinematic entry */
 (async function cinematicEntry(){
   lbTop.style.height='0px'; lbBottom.style.height='0px';
   requestAnimationFrame(()=>{ lbTop.style.transition='height 480ms ease'; lbBottom.style.transition='height 480ms ease'; lbTop.style.height='72px'; lbBottom.style.height='72px'; });
-  await sleep(820);
+  await sleep(760);
   await runChatIntro();
   lbTop.style.height='0px'; lbBottom.style.height='0px';
 })();
 
 async function runChatIntro(){
-  chatArea.innerHTML='';
+  chatArea.innerHTML = '';
   for(let i=0;i<storySequence.length;i++){
     typing.classList.remove('hidden');
     await sleep(700 + Math.random()*350);
@@ -292,10 +297,9 @@ async function appendMessage(who, text){
   requestAnimationFrame(()=>{ el.style.transition='opacity 360ms ease, transform 360ms ease'; el.style.opacity = 1; el.style.transform = 'translateY(0)'; });
 }
 
-/* Audio initialization (called on first user gesture) */
-/* User requested music to be 40% quieter (i.e. target volume = 0.6) and fade softer */
-const MUSIC_TARGET_VOLUME = 0.6; // 40% quieter than 1.0
-const MUSIC_FADE_SECONDS = 2.4;   // softer/more gentle fade
+/* AUDIO: init WebAudio for gentle fade; user requested music -40% (target 0.6) and softer fade */
+const MUSIC_TARGET = 0.6;
+const MUSIC_FADE_SEC = 2.4;
 
 function initAudioOnce(){
   if(audioInitialized) return;
@@ -305,15 +309,15 @@ function initAudioOnce(){
     if(musicEl){
       musicSource = audioCtx.createMediaElementSource(musicEl);
       musicGain = audioCtx.createGain();
-      musicGain.gain.value = 0.0; // start silent
+      musicGain.gain.value = 0.0;
       musicSource.connect(musicGain).connect(audioCtx.destination);
       musicEl.loop = true;
     }
   }catch(e){
-    console.warn('audio init failed', e);
+    console.warn('Audio init error', e);
   }
 }
-function fadeMusicTo(target = MUSIC_TARGET_VOLUME, time = MUSIC_FADE_SECONDS){
+function fadeMusicTo(target = MUSIC_TARGET, time = MUSIC_FADE_SEC){
   if(!musicGain || !audioCtx) return;
   const now = audioCtx.currentTime;
   musicGain.gain.cancelScheduledValues(now);
@@ -325,14 +329,21 @@ function startMusic(){
   try{
     if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
     const p = musicEl.play();
-    if(p && p.then){ p.then(()=>{ fadeMusicTo(MUSIC_TARGET_VOLUME, MUSIC_FADE_SECONDS); }).catch(()=>{}); }
-    else fadeMusicTo(MUSIC_TARGET_VOLUME, MUSIC_FADE_SECONDS);
+    if(p && p.then) p.then(()=>{ fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC); }).catch(()=>{});
+    else fadeMusicTo(MUSIC_TARGET, MUSIC_FADE_SEC);
   }catch(e){ console.warn('startMusic error', e); }
 }
-function stopMusic(){
+function stopMusicImmediate(){
   try{
-    fadeMusicTo(0.0, 1.0);
-    setTimeout(()=>{ if(musicEl){ musicEl.pause(); } }, 1100);
+    if(musicGain && audioCtx){
+      const now = audioCtx.currentTime;
+      musicGain.gain.cancelScheduledValues(now);
+      musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+      musicGain.gain.linearRampToValueAtTime(0.0, now + 0.8);
+      setTimeout(()=>{ try{ musicEl.pause(); }catch(e){} }, 900);
+    } else {
+      try{ musicEl.pause(); }catch(e){}
+    }
   }catch(e){}
 }
 function playClick(){
@@ -340,26 +351,25 @@ function playClick(){
   try{ clickEl.currentTime = 0; clickEl.play().catch(()=>{}); }catch(e){}
 }
 
-/* Start button behavior */
+/* Start button */
 startBtn.addEventListener('click', async ()=>{
-  // init audio and start music (user gesture)
   initAudioOnce();
   if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume().catch(()=>{});
   startMusic();
 
   startBtn.disabled = true;
   startBtn.textContent = 'Идёт...';
-  await sleep(180);
+  await sleep(160);
   await appendMessage('me','Окей — начинаем!');
-  frame.classList.add('collapsed'); // collapse left pane
+  frame.classList.add('collapsed');
   await sleep(420);
   initGame();
 });
 
-/* Game init & spawn */
+/* Game initialization & spawning */
 function initGame(){
   score = 0; updateScore();
-  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const i = new Image(); i.src = m.content; }});
+  CONFIG.memories.forEach(m=>{ if(m.type==='img'){ const im = new Image(); im.src = m.content; }});
   spawnTimer = setInterval(()=>{ if(activeMemories.length < CONFIG.maxSimultaneous) spawnMemory(); }, CONFIG.spawnInterval);
   spawnMemory();
   renderSavedBar();
@@ -367,14 +377,12 @@ function initGame(){
 
 function spawnMemory(){
   const template = CONFIG.memories[Math.floor(Math.random()*CONFIG.memories.length)];
-  const node = document.createElement('div'); node.className='memory';
+  const node = document.createElement('div'); node.className = 'memory';
   node.style.left = (6 + Math.random()*88) + '%'; node.style.top = '-160px';
   node.tabIndex = 0;
   if(template.type === 'img'){
-    const img = document.createElement('img'); img.src = template.content; img.alt = template.label || '';
+    const img = document.createElement('img'); img.src = template.content; img.alt = '';
     node.appendChild(img);
-    const lab = document.createElement('div'); lab.className='mem-label'; lab.innerText = template.label || '';
-    node.appendChild(lab);
   } else {
     const t = document.createElement('div'); t.style.padding='8px'; t.innerText = template.content; node.appendChild(t);
   }
@@ -382,21 +390,22 @@ function spawnMemory(){
   const memObj = { el: node, y: -160, id: Date.now()+Math.random(), meta: template };
   activeMemories.push(memObj);
 
-  node.addEventListener('click', (e)=>{ e.stopPropagation(); saveMemory(memObj); });
-  node.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(memObj); });
+  node.addEventListener('click',(e)=>{ e.stopPropagation(); saveMemory(memObj); });
+  node.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' ') saveMemory(memObj); });
 
+  // drag
   let dragging=false, startX=0, startY=0, offsetX=0, offsetY=0;
-  node.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; startX=ev.clientX; startY=ev.clientY; offsetX=parseFloat(node.style.left); offsetY=memObj.y; node.style.transition='transform 0s'; });
-  node.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const dx = ev.clientX - startX; const dy = ev.clientY - startY; memObj.y = offsetY + dy; node.style.top = memObj.y + 'px'; node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)){ dropArea.style.borderColor='rgba(255,255,255,0.7)'; } else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
-  node.addEventListener('pointerup', (ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(memObj); });
+  node.addEventListener('pointerdown',(ev)=>{ ev.preventDefault(); node.setPointerCapture(ev.pointerId); dragging=true; startX=ev.clientX; startY=ev.clientY; offsetX=parseFloat(node.style.left); offsetY=memObj.y; node.style.transition='transform 0s'; });
+  node.addEventListener('pointermove',(ev)=>{ if(!dragging) return; const dx = ev.clientX - startX; const dy = ev.clientY - startY; memObj.y = offsetY + dy; node.style.top = memObj.y + 'px'; node.style.left = Math.max(2, Math.min(92, offsetX + (dx / window.innerWidth * 100))) + '%'; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); if(intersect(zRect,nRect)){ dropArea.style.borderColor='rgba(255,255,255,0.7)'; } else dropArea.style.borderColor='rgba(255,255,255,0.06)'; });
+  node.addEventListener('pointerup',(ev)=>{ dragging=false; node.releasePointerCapture && node.releasePointerCapture(ev.pointerId); node.style.transition=''; const zRect = dropArea.getBoundingClientRect(); const nRect = node.getBoundingClientRect(); dropArea.style.borderColor='rgba(255,255,255,0.06)'; if(intersect(zRect,nRect)) saveMemory(memObj); });
 
-  // easter: triple tap for pet images
-  if(template.type==='img' && /pet/i.test(template.content)){
-    attachTripleTap(node, ()=> showPetEaster(template.label || 'Питомец'));
+  // little easter for pet images
+  if(template.type === 'img' && /pet/i.test(template.content)){
+    attachTripleTap(node, ()=> showPetEaster());
   }
 }
 
-/* falling */
+/* Falling ticker */
 const ticker = setInterval(()=>{
   activeMemories.forEach(m=>{ m.y += (CONFIG.fallSpeed * (0.9 + Math.random()*0.5)); if(m.el) m.el.style.top = (m.y) + 'px'; });
   activeMemories = activeMemories.filter(m=>{
@@ -409,16 +418,15 @@ const ticker = setInterval(()=>{
 
 function intersect(r1,r2){ return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top); }
 
-/* save memory */
+/* Save memory (in-memory only) */
 function saveMemory(memObj){
   if(!memObj || !memObj.el) return;
   memObj.el.style.transition='transform 320ms ease, opacity 320ms ease'; memObj.el.style.transform='scale(0.78) translateY(20px)'; memObj.el.style.opacity='0';
   activeMemories = activeMemories.filter(m=>m.id !== memObj.id);
   setTimeout(()=>{ try{ memObj.el.remove(); }catch(e){} }, 360);
 
-  const item = { type: memObj.meta.type, content: memObj.meta.content, label: memObj.meta.label || '', when: Date.now() };
+  const item = { type: memObj.meta.type, content: memObj.meta.content, when: Date.now() };
   savedMemories.push(item);
-  // we DO NOT persist across visits (user requested reset each visit), but we keep in-memory this visit
   renderSavedBar();
 
   playClick();
@@ -426,124 +434,100 @@ function saveMemory(memObj){
   score++; updateScore();
   if(score >= CONFIG.requiredToWin) triggerFinalSequence();
 }
-function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,120,150,0.04)'; setTimeout(()=>{ document.body.style.boxShadow=''; },260); }
+function flash(){ document.body.style.transition='box-shadow 220ms ease'; document.body.style.boxShadow='inset 0 0 160px rgba(255,107,143,0.04)'; setTimeout(()=>{ document.body.style.boxShadow=''; },260); }
 function updateScore(){ scoreBox.textContent = score; }
 
-/* render saved thumbnails */
+/* Render saved thumbnails in HUD (last 6) */
 function renderSavedBar(){
   savedBar.innerHTML = '';
   const list = savedMemories.slice(-6);
   list.forEach(item=>{
     const el = document.createElement('div'); el.className = 'saved-thumb';
-    if(item.type==='img'){ const img = document.createElement('img'); img.src = item.content; img.alt = item.label || ''; el.appendChild(img); }
-    else { el.textContent = item.label || item.content; el.style.padding='6px'; }
+    const img = document.createElement('img'); img.src = item.content;
+    el.appendChild(img);
     el.addEventListener('click', ()=> openViewer(item));
     savedBar.appendChild(el);
   });
 }
 
-/* final cinematic */
+/* Final sequence: show romantic text (music keeps playing), then heart appears.
+   DO NOT stop music here — user presses heart to stop music and see final video. */
 async function triggerFinalSequence(){
   stopSpawning();
   await sleep(420);
   lbTop.style.transition='height 420ms ease'; lbBottom.style.transition='height 420ms ease';
   lbTop.style.height='72px'; lbBottom.style.height='72px';
-  await sleep(700);
+  await sleep(520);
+  // show cinematic lines in chat
   await appendMessage('them','Некоторые вещи невозможно удалить.');
-  await sleep(600);
+  await sleep(520);
   await appendMessage('them','Особенно чувства.');
-  await sleep(700);
-  // fade music softer
-  stopMusic();
-  showFinal();
-  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; },1200);
+  await sleep(720);
+  // reveal romantic overlay
+  await showRomanticOverlay();
+  // retract letterbox after overlay shown
+  setTimeout(()=>{ lbTop.style.height='0px'; lbBottom.style.height='0px'; }, 1100);
 }
 function stopSpawning(){ clearInterval(spawnTimer); spawnTimer=null; }
 
-/* show final */
-function showFinal(){
-  finalWrap.classList.add('active'); finalTextEl.innerHTML='';
-  (async ()=>{
-    for(const p of FINAL_PARAGRAPHS){
-      const el = document.createElement('p'); el.innerHTML = p.replace(/\n/g,'<br>'); el.style.opacity=0; el.style.transform='translateY(8px)';
-      finalTextEl.appendChild(el);
-      requestAnimationFrame(()=>{ el.style.transition='opacity 420ms ease, transform 420ms ease'; el.style.opacity=1; el.style.transform='translateY(0)'; });
-      await sleep(900);
-    }
-  })();
+/* Show romantic overlay: animate paragraphs one by one, then show pulsing heart */
+async function showRomanticOverlay(){
+  finalWrap.classList.add('active');
+  romanticText.innerHTML = '';
+  // create paragraphs
+  for(let i=0;i<FINAL_PARAGRAPHS.length;i++){
+    const p = document.createElement('p'); p.innerHTML = FINAL_PARAGRAPHS[i];
+    romanticText.appendChild(p);
+    // reveal with stagger
+    await sleep(360);
+    p.classList.add('visible');
+    await sleep(600);
+  }
+  // show heart after small delay
+  await sleep(420);
+  heartContainer.style.display = 'block';
+}
+
+/* Heart click: stop music and show final video */
+heartBtn.addEventListener('click', async ()=>{
+  // stop music with soft fade
+  stopMusicImmediate();
+  // reveal final video
   if(CONFIG.finalMedia && CONFIG.finalMedia.toLowerCase().endsWith('.mp4')){
     finalVideo.src = CONFIG.finalMedia;
     finalVideo.classList.remove('hidden');
-    finalVideo.play().catch(()=>{}); // user can press play if autoplay blocked
-  }
-}
-
-/* replay final */
-replayBtn.addEventListener('click', ()=>{ if(finalVideo.src){ finalVideo.currentTime = 0; finalVideo.play().catch(()=>{}); } });
-
-/* HUG button: try to close page, fallback to a fullscreen "обнял" overlay and disable interaction */
-hugBtn.addEventListener('click', ()=>{
-  // Attempt to close window (works if opened by script)
-  try {
-    window.close();
-    // if window didn't close (most likely), fallback after short delay
-    setTimeout(()=>{ if(!document.hidden){ showHugOverlay(); } }, 250);
-  } catch(e){
-    showHugOverlay();
+    try{ await finalVideo.play(); }catch(e){}
   }
 });
 
-function showHugOverlay(){
-  // remove all interactive content and show a simple "Обнял" screen
-  document.documentElement.style.background = '#000';
-  document.body.innerHTML = '';
-  const div = document.createElement('div');
-  div.style.position = 'fixed';
-  div.style.inset = '0';
-  div.style.display = 'flex';
-  div.style.flexDirection = 'column';
-  div.style.alignItems = 'center';
-  div.style.justifyContent = 'center';
-  div.style.background = '#000';
-  div.style.color = 'white';
-  div.style.fontFamily = 'Inter, system-ui, sans-serif';
-  div.innerHTML = `<div style="font-size:42px;font-weight:700;margin-bottom:12px">Обнял ❤️</div><div style="opacity:0.8">Спасибо, что посмотрела</div>`;
-  document.body.appendChild(div);
-  // remove any timers
-  try{ clearInterval(spawnTimer); }catch(e){}
-}
-
-/* gallery */
+/* Gallery (in-memory only; cleared each visit) */
 openGalleryBtn.addEventListener('click', openGallery);
 closeGalleryBtn.addEventListener('click', ()=>{ galleryModal.classList.remove('active'); galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; });
 function openGallery(){
   galleryGrid.innerHTML = '';
-  if(savedMemories.length===0){
-    const n=document.createElement('div'); n.className='muted'; n.style.padding='20px'; n.textContent='Пока пусто — сначала сохрани пару моментов.'; galleryGrid.appendChild(n);
+  if(savedMemories.length === 0){
+    const n = document.createElement('div'); n.className='muted'; n.style.padding='20px'; n.textContent='Пока пусто — сначала сохрани пару моментов.'; galleryGrid.appendChild(n);
   } else {
     savedMemories.slice().reverse().forEach(item=>{
-      const g=document.createElement('div'); g.className='thumb';
-      if(item.type==='img'){ const img=document.createElement('img'); img.src=item.content; g.appendChild(img); }
-      else { const t=document.createElement('div'); t.style.padding='12px'; t.textContent=item.label||item.content; g.appendChild(t); }
-      const cap = document.createElement('div'); cap.className='cap'; cap.textContent = item.label || new Date(item.when).toLocaleString();
+      const g = document.createElement('div'); g.className='thumb';
+      const img = document.createElement('img'); img.src = item.content; g.appendChild(img);
+      const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = new Date(item.when).toLocaleString();
       g.appendChild(cap);
       g.addEventListener('click', ()=> openViewer(item));
       galleryGrid.appendChild(g);
     });
   }
-  galleryModal.classList.add('active');
-  galleryModal.setAttribute('aria-hidden','false');
-  document.body.style.overflow='hidden';
+  galleryModal.classList.add('active'); galleryModal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
 }
 
-/* viewer */
+/* Viewer */
 function openViewer(item){
   viewerCard.innerHTML = '';
   const wrap = document.createElement('div'); wrap.style.padding='0';
   const content = document.createElement('div');
-  if(item.type === 'img'){ const img = document.createElement('img'); img.src = item.content; img.alt = item.label || ''; content.appendChild(img); }
+  if(item.type === 'img'){ const img = document.createElement('img'); img.src = item.content; content.appendChild(img); }
   else { const t = document.createElement('div'); t.style.padding='18px'; t.style.color='white'; t.textContent = item.content; content.appendChild(t); }
-  const meta = document.createElement('div'); meta.className='meta'; meta.textContent = (item.label ? item.label + ' — ' : '') + new Date(item.when).toLocaleString();
+  const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = new Date(item.when).toLocaleString();
   wrap.appendChild(content); wrap.appendChild(meta); viewerCard.appendChild(wrap);
   viewer.classList.add('active'); viewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
   wrap.style.transform='scale(.96)'; wrap.style.opacity='0';
@@ -552,23 +536,21 @@ function openViewer(item){
 }
 closeViewer.addEventListener('click', ()=>{ viewer.classList.remove('active'); viewer.setAttribute('aria-hidden','true'); viewerCard.innerHTML=''; document.body.style.overflow=''; });
 
-/* clear saved (in-memory) */
+/* Clear saved (in-memory) */
 clearSaved.addEventListener('click', ()=>{ if(!confirm('Очистить все сохранённые моменты?')) return; savedMemories=[]; renderSavedBar(); alert('Готово — сохранения удалены.'); });
 
-/* triple tap easter */
+/* simple easter helper */
 function attachTripleTap(node, cb){
   let taps = [];
   node.addEventListener('pointerdown', (e)=>{ const now = Date.now(); taps.push(now); taps = taps.filter(t => now - t < 1200); if(taps.length >= 3){ taps=[]; try{ cb(); }catch(e){} }});
 }
-function showPetEaster(name){
-  const msg = document.createElement('div'); msg.style.position='fixed'; msg.style.top='14%'; msg.style.left='50%'; msg.style.transform='translateX(-50%)'; msg.style.padding='12px 16px'; msg.style.borderRadius='12px'; msg.style.background='linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))'; msg.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'; msg.style.zIndex='140'; msg.innerHTML = `<strong>Псс…</strong> ${name} — герой этой истории :)`; document.body.appendChild(msg); setTimeout(()=>{ msg.style.transition='opacity 420ms ease'; msg.style.opacity=0; setTimeout(()=>msg.remove(),420); },2200);
-}
+function showPetEaster(){ const msg = document.createElement('div'); msg.style.position='fixed'; msg.style.top='14%'; msg.style.left='50%'; msg.style.transform='translateX(-50%)'; msg.style.padding='12px 16px'; msg.style.borderRadius='12px'; msg.style.background='linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))'; msg.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'; msg.style.zIndex='140'; msg.innerHTML = '<strong>Псс…</strong> милый питомец здесь :)'; document.body.appendChild(msg); setTimeout(()=>{ msg.style.transition='opacity 420ms ease'; msg.style.opacity=0; setTimeout(()=>msg.remove(),420); },2200); }
 
-/* utility: prevent overscroll while dragging */
+/* Prevent overscroll while dragging */
 document.addEventListener('touchmove', (e)=>{ if(e.target.closest && e.target.closest('.memory')) e.preventDefault(); }, {passive:false});
 
 /* init UI */
-(function initUI(){ renderSavedBar(); })();
+(function initUI(){ renderSavedBar(); /* avatar fallback handling */ const av = document.getElementById('avatarImg'); av.addEventListener('error', ()=>{ document.getElementById('avatarImg').style.display='none'; document.getElementById('avatarFallback').style.display='flex'; }); })();
 </script>
 </body>
 </html>
