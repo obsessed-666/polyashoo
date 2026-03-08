@@ -167,8 +167,7 @@ button{font:inherit;cursor:pointer;border:0;background:none}
       <div class="profile">
         <div class="avatar"><img src="avatar.jpg" alt="avatar"></div>
         <div>
-          <div style="font-weight:700">Интернет открыточка Полиночке</div>
-          <div style="font-size:13px;color:var(--muted)">Мини-игра про милоту</div>
+          <div style="font-weight:700">Интернет открыточка котяку Полиночке</div>
         </div>
       </div>
       <div class="chat-log" id="chatLog"></div>
@@ -191,15 +190,7 @@ button{font:inherit;cursor:pointer;border:0;background:none}
 
         <div class="final-overlay" id="finalOverlay">
           <div class="final-card">
-            <div class="romantic" id="romanticText">Поля, котичка, я знаю тебя так недолго, всего полтора месяца,
-но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях.
-
-Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку.
-
-Полгода назад я и представить не мог,
-что смогу полюбить кого-то так сильно как тебя.
-
-Если бы не было тебя — не было бы меня.</div>
+            <div class="romantic" id="romanticText">Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне теплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет. Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было. Полгода назад я и представить не мог, что смогу привязаться так сильно к кому-то, как к тебе. Если бы я был слепым — ты была бы моим зрением. Если бы я был глухим — ты была бы моим слухом. Если бы я был немым — ты была бы моим голосом. Если бы не было тебя — не было бы меня. Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.</div>
 
             <button class="heart-btn" id="heartBtn" aria-label="Сердце">
               <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
@@ -320,7 +311,7 @@ function renderSavedBar(){
   });
 }
 function intersects(a, b){
-  return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.top);
+  return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
 }
 
 /* --- Spawning & game loop --- */
@@ -433,10 +424,10 @@ async function finishGame(){
 
 /* --- UI wiring --- */
 const intro = [
-  'Привет, котичка 💖',
-  'Лови падающие моменты: тапай или перетаскивай.',
-  'Сохрани 5 штук, чтобы открыть финал.',
-  'Готова? Нажимай «начать».'
+  'приветки поля, я немного стесняюсь',
+  'я может и просто бегущая строка - но я вижу как ты необычайно красива сегодня',
+  'тут лёгенькая игра, нужно спасти несколько падающих прикольчиков',
+  'готова? тык "начать"'
 ];
 
 async function runIntro(){
