@@ -186,6 +186,9 @@
     }
     #finalVideo{display:block;width:min(100%,760px);max-height:70vh;border-radius:14px;background:#000}
     .video-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%}
+    .video-actions .btn{animation:finalBtnPulse 2.2s ease-in-out infinite}
+    .video-actions .btn.secondary{animation-delay:.25s}
+    @keyframes finalBtnPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 rgba(255,95,143,0)}50%{transform:scale(1.03);box-shadow:0 0 18px rgba(255,95,143,.25)}}
 
     .gallery{position:fixed;inset:0;z-index:30;display:none;flex-direction:column;gap:12px;padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));background:rgba(0,0,0,.82)}
     .gallery.show{display:flex}
@@ -278,7 +281,7 @@
           <div class="avatar"><img src="avatar.jpg" alt="avatar"></div>
           <div>
             <div style="font-weight:700">Интернет открыточка котяку Полиночке</div>
-          </div>
+                      </div>
         </div>
         <div class="chat-log" id="chatLog"></div>
         <div class="typing" id="typing">печатает...</div>
@@ -301,15 +304,7 @@
           <div class="final-overlay" id="finalOverlay" aria-hidden="true">
             <div class="final-card">
               <div class="romantic-wrap" id="romanticWrap">
-                <div class="romantic" id="romanticText">Поля, котичка, я знаю тебя так недолго, всего полтора месяца,
-но во мне тёплится чувство будто я знал тебя во всех своих прошлых жизнях.
-
-Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку.
-
-Полгода назад я и представить не мог,
-что смогу полюбить кого-то так сильно как тебя.
-
-Если бы не было тебя — не было бы меня.</div>
+                <div class="romantic" id="romanticText">Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне теплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет. Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было. Полгода назад я и представить не мог, что смогу привязаться так сильно к кому-то, как к тебе. Если бы я был слепым — ты была бы моим зрением. Если бы я был глухим — ты была бы моим слухом. Если бы я был немым — ты была бы моим голосом. Если бы не было тебя — не было бы меня. Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.</div>
               </div>
 
               <div class="heart-wrap" id="heartWrap">
@@ -317,21 +312,26 @@
                   <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <defs>
                       <linearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#ffd0dd" />
-                        <stop offset="55%" stop-color="#ff5f8f" />
-                        <stop offset="100%" stop-color="#ff3a77" />
+                        <stop offset="0%" stop-color="#ffd8e6" />
+                        <stop offset="45%" stop-color="#ff6c9b" />
+                        <stop offset="100%" stop-color="#d91f63" />
                       </linearGradient>
-                      <radialGradient id="heartShine" cx="35%" cy="28%" r="55%">
-                        <stop offset="0%" stop-color="#fff" stop-opacity=".58"/>
-                        <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                      <radialGradient id="heartGloss" cx="30%" cy="24%" r="60%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity=".72"/>
+                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
                       </radialGradient>
+                      <filter id="heartShadow" x="-40%" y="-40%" width="180%" height="200%">
+                        <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#000" flood-opacity=".35"/>
+                      </filter>
                     </defs>
-                    <path d="M110 193c-18-13-73-52-89-82-15-27-1-62 29-70 23-6 45 5 60 24 15-19 37-30 60-24 30 8 44 43 29 70-16 30-71 69-89 82z" fill="url(#heartGrad)"/>
-                    <path d="M110 193c-18-13-73-52-89-82-15-27-1-62 29-70 23-6 45 5 60 24 15-19 37-30 60-24 30 8 44 43 29 70-16 30-71 69-89 82z" fill="url(#heartShine)"/>
-                    <g transform="rotate(-14 110 110)">
-                      <line x1="30" y1="110" x2="190" y2="110" stroke="#f8f8ff" stroke-width="8" stroke-linecap="round"/>
-                      <polygon points="25,110 43,99 43,121" fill="#f8f8ff"/>
-                      <polygon points="195,110 178,102 178,118" fill="#f8f8ff"/>
+                    <g filter="url(#heartShadow)">
+                      <path d="M110 194c-20-15-76-54-92-84-15-29 1-67 34-76 24-7 47 4 58 22 11-18 34-29 58-22 33 9 49 47 34 76-16 30-72 69-92 84z" fill="url(#heartGrad)"/>
+                      <path d="M110 194c-20-15-76-54-92-84-15-29 1-67 34-76 24-7 47 4 58 22 11-18 34-29 58-22 33 9 49 47 34 76-16 30-72 69-92 84z" fill="url(#heartGloss)"/>
+                    </g>
+                    <g transform="rotate(-16 110 110)">
+                      <line x1="26" y1="111" x2="194" y2="111" stroke="#f5f7ff" stroke-width="8" stroke-linecap="round"/>
+                      <polygon points="22,111 42,99 42,123" fill="#f5f7ff"/>
+                      <polygon points="198,111 176,101 176,121" fill="#f5f7ff"/>
                     </g>
                   </svg>
                 </div>
@@ -517,7 +517,7 @@
         x,
         y: -itemSize - 10,
         size: itemSize,
-        speed: minSpeed + Math.random() * (maxSpeed - minSpeed),
+        speed: (minSpeed + Math.random() * (maxSpeed - minSpeed)) * 1.2,
         dragging: false,
         moved: false,
         dragDx: 0,
