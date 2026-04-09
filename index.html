@@ -147,13 +147,15 @@
     }
     .rom-char{
       opacity:0;
-      transform:translateY(10px);
+      transform:translateY(9px) scale(.985);
       display:inline-block;
-      animation:romReveal .5s ease forwards, jitter 4s ease-in-out infinite;
-      animation-delay:var(--d,0ms), calc(var(--jd,0ms) + 1.1s);
+      animation:romReveal .72s cubic-bezier(.22,.78,.25,1) forwards, romFloat 5.6s ease-in-out infinite, romPulse 4.2s ease-in-out infinite;
+      animation-delay:var(--d,0ms), calc(var(--jd,0ms) + 1.3s), calc(var(--jd,0ms) + 1.3s);
+      will-change:transform,opacity;
     }
-    @keyframes romReveal{to{opacity:1;transform:translateY(0)}}
-    @keyframes jitter{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.4px)}}
+    @keyframes romReveal{to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes romFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1.8px) scale(1.01)}}
+    @keyframes romPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.08)}}
 
     .heart-wrap{display:none;flex-direction:column;align-items:center;gap:8px}
     .heart-wrap.show{display:flex}
@@ -304,34 +306,46 @@
           <div class="final-overlay" id="finalOverlay" aria-hidden="true">
             <div class="final-card">
               <div class="romantic-wrap" id="romanticWrap">
-                <div class="romantic" id="romanticText">Поля, котичка, я знаю тебя так недолго, всего полтора месяца, но во мне теплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет. Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было. Полгода назад я и представить не мог, что смогу привязаться так сильно к кому-то, как к тебе. Если бы я был слепым — ты была бы моим зрением. Если бы я был глухим — ты была бы моим слухом. Если бы я был немым — ты была бы моим голосом. Если бы не было тебя — не было бы меня. Я люблю каждый твой недостаток, каждый изъянчик, ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.</div>
+                <div class="romantic" id="romanticText">Поля, котичка, я знаю тебя так недолго, всего два с половиной месяца, но во мне теплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет. Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было. Полгода назад я и представить не мог, что смогу привязаться так сильно к кому-то, как к тебе. Если бы я был слепым — ты была бы моим зрением. Если бы я был глухим — ты была бы моим слухом. Если бы я был немым — ты была бы моим голосом. Если бы не было тебя — не было бы меня <3 Даже когда ты злишься или обижаешься - мое отношение к тебе ничуть не меняется. Я люблю каждый твой недостаток, каждый изъянчик, каждое несовершенство. Ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.</div>
               </div>
 
               <div class="heart-wrap" id="heartWrap">
                 <div id="heartBtn" role="button" tabindex="0" aria-label="сердечко">
                   <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <defs>
-                      <linearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#ffd8e6" />
-                        <stop offset="45%" stop-color="#ff6c9b" />
-                        <stop offset="100%" stop-color="#d91f63" />
+                      <linearGradient id="kittyHeartGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#ffd9e8"/>
+                        <stop offset="55%" stop-color="#ff7cab"/>
+                        <stop offset="100%" stop-color="#ff4f8f"/>
                       </linearGradient>
-                      <radialGradient id="heartGloss" cx="30%" cy="24%" r="60%">
-                        <stop offset="0%" stop-color="#ffffff" stop-opacity=".72"/>
-                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                      <radialGradient id="kittyGlow" cx="30%" cy="25%" r="60%">
+                        <stop offset="0%" stop-color="#fff" stop-opacity=".7"/>
+                        <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
                       </radialGradient>
-                      <filter id="heartShadow" x="-40%" y="-40%" width="180%" height="200%">
-                        <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#000" flood-opacity=".35"/>
+                      <filter id="kittyShadow" x="-40%" y="-40%" width="180%" height="200%">
+                        <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#000" flood-opacity=".28"/>
                       </filter>
                     </defs>
-                    <g filter="url(#heartShadow)">
-                      <path d="M110 194c-20-15-76-54-92-84-15-29 1-67 34-76 24-7 47 4 58 22 11-18 34-29 58-22 33 9 49 47 34 76-16 30-72 69-92 84z" fill="url(#heartGrad)"/>
-                      <path d="M110 194c-20-15-76-54-92-84-15-29 1-67 34-76 24-7 47 4 58 22 11-18 34-29 58-22 33 9 49 47 34 76-16 30-72 69-92 84z" fill="url(#heartGloss)"/>
+                    <g filter="url(#kittyShadow)">
+                      <path d="M110 194c-20-14-77-54-93-84-16-29 0-67 33-76 24-7 47 3 60 23 13-20 36-30 60-23 33 9 49 47 33 76-16 30-73 70-93 84z" fill="url(#kittyHeartGrad)"/>
+                      <path d="M110 194c-20-14-77-54-93-84-16-29 0-67 33-76 24-7 47 3 60 23 13-20 36-30 60-23 33 9 49 47 33 76-16 30-73 70-93 84z" fill="url(#kittyGlow)"/>
                     </g>
-                    <g transform="rotate(-16 110 110)">
-                      <line x1="26" y1="111" x2="194" y2="111" stroke="#f5f7ff" stroke-width="8" stroke-linecap="round"/>
-                      <polygon points="22,111 42,99 42,123" fill="#f5f7ff"/>
-                      <polygon points="198,111 176,101 176,121" fill="#f5f7ff"/>
+                    <g transform="translate(0,4)">
+                      <ellipse cx="110" cy="105" rx="39" ry="30" fill="#fff8fb" opacity=".95"/>
+                      <ellipse cx="96" cy="102" rx="3.2" ry="4" fill="#2a1f27"/>
+                      <ellipse cx="124" cy="102" rx="3.2" ry="4" fill="#2a1f27"/>
+                      <ellipse cx="110" cy="112" rx="4.5" ry="3.5" fill="#f7d557"/>
+                      <path d="M68 101h18M66 109h18M68 117h18M136 101h18M136 109h18M136 117h18" stroke="#fff" stroke-width="2.3" stroke-linecap="round" opacity=".9"/>
+                      <g transform="translate(127 77)">
+                        <ellipse cx="7" cy="8" rx="8" ry="7" fill="#ff4f8f"/>
+                        <ellipse cx="20" cy="8" rx="8" ry="7" fill="#ff4f8f"/>
+                        <circle cx="13.5" cy="8" r="3.2" fill="#ffd8e8"/>
+                      </g>
+                    </g>
+                    <g transform="rotate(-14 110 110)">
+                      <line x1="27" y1="111" x2="193" y2="111" stroke="#f9f9ff" stroke-width="8" stroke-linecap="round"/>
+                      <polygon points="23,111 43,98 43,124" fill="#f9f9ff"/>
+                      <polygon points="197,111 175,101 175,121" fill="#f9f9ff"/>
                     </g>
                   </svg>
                 </div>
@@ -372,7 +386,7 @@
   <audio id="click" src="click.mp3" preload="auto"></audio>
 
   <script>
-    const MEMORIES = ['mem1.jpg','mem2.jpg','mem3.jpg','pet1.jpg','pet2.jpg','pet3.jpg'];
+    const MEMORIES = ['mem1.jpg','mem2.jpg','mem3.jpg','mem4.jpg','pet1.jpg','pet2.jpg','pet3.jpg'];
     const REQUIRED = 5;
 
     const frame = document.getElementById('frame');
@@ -420,6 +434,7 @@
 
     let viewerIndex = 0;
     let viewerTouchStartX = 0;
+    let memoryBag = [];
 
     const isMobile = window.matchMedia('(max-width: 440px)').matches;
     const maxActive = isMobile ? 2 : 4;
@@ -499,10 +514,25 @@
       else draggingCount = Math.max(0, draggingCount - 1);
     }
 
+    function refillMemoryBag(){
+      memoryBag = MEMORIES.slice();
+      for (let i = memoryBag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = memoryBag[i];
+        memoryBag[i] = memoryBag[j];
+        memoryBag[j] = temp;
+      }
+    }
+
+    function getNextMemorySrc(){
+      if (!memoryBag.length) refillMemoryBag();
+      return memoryBag.pop();
+    }
+
     function spawnItem(){
       if (!running || active.length >= maxActive) return;
 
-      const src = MEMORIES[Math.floor(Math.random() * MEMORIES.length)];
+      const src = getNextMemorySrc();
       const el = document.createElement('div');
       el.className = 'fall';
       const img = document.createElement('img');
