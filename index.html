@@ -129,7 +129,7 @@
     @keyframes fadeIn{from{opacity:0;transform:scale(1.02);filter:blur(5px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
 
     .final-card{
-      width:min(92%,840px);
+      width:min(97%,1040px);
       min-height:100%;
       margin:0 auto;
       display:flex;
@@ -141,7 +141,7 @@
     }
     .romantic-wrap{
       width:100%;
-      max-height:calc(100vh - 330px);
+      max-height:calc(100vh - 300px);
       overflow-y:auto;
       overflow-x:hidden;
       padding:4px 4px 8px;
@@ -162,10 +162,12 @@
       line-height:1.35;
       opacity:0;
       transform:translateY(8px);
-      animation:parReveal .7s ease forwards;
+      animation:parReveal .7s ease forwards, parFloat 6.8s ease-in-out infinite, parPulse 5.2s ease-in-out infinite;
     }
     .rom-paragraph:last-child{margin-bottom:0}
     @keyframes parReveal{to{opacity:1;transform:translateY(0)}}
+    @keyframes parFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2px)}}
+    @keyframes parPulse{0%,100%{opacity:1}50%{opacity:.96}}
 
     .rom-char{
       opacity:0;
@@ -723,9 +725,9 @@
       addMessage('Окей, начинаем!', 'me');
       startMusic();
       frame.classList.add('glitch-flash');
-      await wait(380);
+      await wait(260);
       frame.classList.remove('glitch-flash');
-      await wait(220);
+      await wait(160);
       startGame();
       startBtn.disabled = true;
     });
@@ -734,12 +736,17 @@
       heartWrap.style.display = 'none';
       const romanticWrap = document.getElementById('romanticWrap');
       romanticWrap.style.opacity = '.2';
+      finalOverlay.style.transition = 'filter .36s ease, opacity .36s ease';
+      finalOverlay.style.filter = 'blur(2px)';
+      finalOverlay.style.opacity = '.94';
       await wait(220);
       romanticWrap.style.display = 'none';
       stopMusic();
       await wait(220);
       game.style.filter = 'none';
       game.style.transform = 'none';
+      finalOverlay.style.filter = 'none';
+      finalOverlay.style.opacity = '1';
       videoWrap.style.display = 'flex';
       requestAnimationFrame(() => {
         videoWrap.style.opacity = '1';
