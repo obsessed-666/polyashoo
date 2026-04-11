@@ -25,7 +25,7 @@
     #bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
     .bg-shade{position:fixed;inset:0;background:linear-gradient(180deg,rgba(5,6,15,.45),rgba(5,6,15,.82));z-index:1;opacity:1;transition:opacity .8s ease}
 
-     .app{
+    .app{
       position:relative;
       opacity:0;
       transform:scale(1.01);
@@ -51,11 +51,11 @@
       box-shadow:0 24px 70px rgba(0,0,0,.45);
     }
 
-    
     .app.awake{opacity:1;transform:scale(1)}
     .glitch-flash{animation:softGlitch .38s ease}
     @keyframes softGlitch{0%{filter:none}30%{filter:contrast(1.18) saturate(1.2) blur(.5px)}60%{filter:contrast(.95) saturate(.9)}100%{filter:none}}
-.chat{
+
+    .chat{
       background:var(--panel);
       border-right:1px solid rgba(255,255,255,.1);
       display:flex;
@@ -129,7 +129,7 @@
     @keyframes fadeIn{from{opacity:0;transform:scale(1.02);filter:blur(5px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
 
     .final-card{
-      width:min(97%,1040px);
+      width:min(100%,1200px);
       min-height:100%;
       margin:0 auto;
       display:flex;
@@ -140,46 +140,79 @@
       text-align:center;
     }
     .romantic-wrap{
-      width:100%;
-      max-height:calc(100vh - 300px);
+      width:min(100%,1200px);
+      max-height:calc(100vh - 260px);
       overflow-y:auto;
       overflow-x:hidden;
-      padding:4px 4px 8px;
+      padding:8px 10px 12px;
       -webkit-overflow-scrolling:touch;
+      margin:0 auto;
     }
     .romantic{
       white-space:normal;
-      font:700 clamp(23px,2.2vw,34px)/1.26 'Cormorant Garamond',serif;
+      width:100%;
+      max-width:1200px;
+      margin:0 auto;
+      font:700 clamp(21px,2.05vw,34px)/1.34 'Cormorant Garamond',serif;
       color:#fff7fb;
       text-shadow:0 0 12px rgba(255,134,178,.45),0 0 22px rgba(255,134,178,.2);
       word-break:normal;
       overflow-wrap:normal;
       hyphens:none;
       text-wrap:pretty;
+      text-align:center;
     }
     .rom-paragraph{
-      margin:0 0 14px;
-      line-height:1.35;
+      width:100%;
+      margin:0 0 18px;
+      line-height:1.4;
       opacity:0;
-      transform:translateY(8px);
-      animation:parReveal .7s ease forwards, parFloat 6.8s ease-in-out infinite, parPulse 5.2s ease-in-out infinite;
+      transform:translateY(10px) scale(.995);
+      animation:parReveal .8s ease forwards;
+      will-change:transform,opacity;
     }
     .rom-paragraph:last-child{margin-bottom:0}
-    @keyframes parReveal{to{opacity:1;transform:translateY(0)}}
-    @keyframes parFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2px)}}
-    @keyframes parPulse{0%,100%{opacity:1}50%{opacity:.96}}
+    @keyframes parReveal{from{opacity:0;transform:translateY(10px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
 
     .rom-char{
       opacity:0;
-      transform:translateY(9px) scale(.985);
+      transform:translateY(8px) scale(.985);
       display:inline-block;
-      animation:romReveal .72s cubic-bezier(.22,.78,.25,1) forwards, romFloat 5.6s ease-in-out infinite, romPulse 4.2s ease-in-out infinite;
-      animation-delay:var(--d,0ms), calc(var(--jd,0ms) + 1.3s), calc(var(--jd,0ms) + 1.3s);
-      will-change:transform,opacity;
+      will-change:transform,opacity,filter;
+    }
+    .rom-char.a{
+      animation:
+        romReveal .72s cubic-bezier(.22,.78,.25,1) forwards,
+        romFloatA 4.05s ease-in-out infinite,
+        romGlow 3.65s ease-in-out infinite;
+      animation-delay:var(--d,0ms), calc(var(--jd,0ms) + 1.1s), calc(var(--jd,0ms) + 1.1s);
+    }
+    .rom-char.b{
+      animation:
+        romReveal .72s cubic-bezier(.22,.78,.25,1) forwards,
+        romFloatB 4.25s ease-in-out infinite,
+        romGlow 3.95s ease-in-out infinite;
+      animation-delay:var(--d,0ms), calc(var(--jd,0ms) + 1.1s), calc(var(--jd,0ms) + 1.1s);
     }
     @keyframes romReveal{to{opacity:1;transform:translateY(0) scale(1)}}
-    @keyframes romFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1.8px) scale(1.01)}}
-    @keyframes romPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.08)}}
+    @keyframes romFloatA{
+      0%,100%{transform:translateY(0) translateX(0) scale(1)}
+      18%{transform:translateY(-5px) translateX(1px) scale(1.02)}
+      40%{transform:translateY(2px) translateX(-1px) scale(.995)}
+      62%{transform:translateY(-3px) translateX(1.2px) scale(1.01)}
+      82%{transform:translateY(1.5px) translateX(-.8px) scale(1.004)}
+    }
+    @keyframes romFloatB{
+      0%,100%{transform:translateY(0) translateX(0) scale(1)}
+      18%{transform:translateY(4px) translateX(-1px) scale(1.012)}
+      40%{transform:translateY(-2px) translateX(1px) scale(.996)}
+      62%{transform:translateY(3px) translateX(-1.2px) scale(1.008)}
+      82%{transform:translateY(-1px) translateX(.8px) scale(1.003)}
+    }
+    @keyframes romGlow{
+      0%,100%{filter:brightness(1) saturate(1)}
+      50%{filter:brightness(1.12) saturate(1.05)}
+    }
 
     .heart-wrap{display:none;flex-direction:column;align-items:center;gap:8px}
     .heart-wrap.show{display:flex}
@@ -291,7 +324,7 @@
       .drop-zone{height:64px;bottom:8px;font-size:13px}
       .saved{max-width:170px}
       .btn,.btn.secondary{padding:10px 11px}
-      .romantic-wrap{max-height:calc(100vh - 290px)}
+      .romantic-wrap{max-height:calc(100vh - 280px)}
       #heartBtn svg{width:118px;height:118px}
       .viewer-inner{grid-template-columns:46px minmax(0,1fr) 46px}
     }
@@ -310,7 +343,7 @@
           <div class="avatar"><img src="avatar.jpg" alt="avatar"></div>
           <div>
             <div style="font-weight:700">Интернет открыточка котяку Полиночке</div>
-                      </div>
+          </div>
         </div>
         <div class="chat-log" id="chatLog"></div>
         <div class="typing" id="typing">печатает...</div>
@@ -414,7 +447,7 @@
     const clickSound = document.getElementById('click');
 
     let score = 0;
-    let saved = []; // reset on page reload, no localStorage
+    let saved = [];
     let active = [];
     let running = false;
 
@@ -673,25 +706,31 @@
       ];
       romanticText.innerHTML = '';
       let idx = 0;
+
       paragraphs.forEach((paragraph, pIndex) => {
-        const p = document.createElement('p');
-        p.className = 'rom-paragraph';
-        p.style.animationDelay = `${pIndex * 240}ms`;
-        for (let i = 0; i < paragraph.length; i++) {
-          const ch = paragraph[i];
-          if (ch === ' ') {
-            p.appendChild(document.createTextNode(' '));
-            continue;
+        const sentences = paragraph.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g) || [paragraph];
+        sentences.map(s => s.trim()).filter(Boolean).forEach((sentence, sIndex) => {
+          const p = document.createElement('p');
+          p.className = 'rom-paragraph';
+          p.style.animationDelay = `${(pIndex * 4 + sIndex) * 220}ms`;
+          p.style.marginBottom = (sIndex === sentences.length - 1) ? '22px' : '14px';
+
+          for (let i = 0; i < sentence.length; i++) {
+            const ch = sentence[i];
+            if (ch === ' ') {
+              p.appendChild(document.createTextNode(' '));
+              continue;
+            }
+            const span = document.createElement('span');
+            span.className = `rom-char ${idx % 2 === 0 ? 'a' : 'b'}`;
+            span.textContent = ch;
+            span.style.setProperty('--d', `${idx * 14}ms`);
+            span.style.setProperty('--jd', `${(idx % 12) * 110}ms`);
+            p.appendChild(span);
+            idx++;
           }
-          const span = document.createElement('span');
-          span.className = 'rom-char';
-          span.textContent = ch;
-          span.style.setProperty('--d', `${idx * 14}ms`);
-          span.style.setProperty('--jd', `${(idx % 12) * 110}ms`);
-          p.appendChild(span);
-          idx++;
-        }
-        romanticText.appendChild(p);
+          romanticText.appendChild(p);
+        });
       });
     }
 
