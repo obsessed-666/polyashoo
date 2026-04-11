@@ -23,10 +23,13 @@
     button{font:inherit;cursor:pointer;border:0}
 
     #bg-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-    .bg-shade{position:fixed;inset:0;background:linear-gradient(180deg,rgba(5,6,15,.34),rgba(5,6,15,.74));z-index:1}
+    .bg-shade{position:fixed;inset:0;background:linear-gradient(180deg,rgba(5,6,15,.45),rgba(5,6,15,.82));z-index:1;opacity:1;transition:opacity .8s ease}
 
-    .app{
+     .app{
       position:relative;
+      opacity:0;
+      transform:scale(1.01);
+      transition:opacity .9s ease, transform .9s ease;
       z-index:2;
       height:100%;
       padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
@@ -35,6 +38,7 @@
       justify-content:center;
     }
     .frame{
+      transition:transform .45s ease, filter .45s ease, opacity .45s ease;
       width:min(1180px,100%);
       height:min(92vh,920px);
       display:grid;
@@ -47,7 +51,11 @@
       box-shadow:0 24px 70px rgba(0,0,0,.45);
     }
 
-    .chat{
+    
+    .app.awake{opacity:1;transform:scale(1)}
+    .glitch-flash{animation:softGlitch .38s ease}
+    @keyframes softGlitch{0%{filter:none}30%{filter:contrast(1.18) saturate(1.2) blur(.5px)}60%{filter:contrast(.95) saturate(.9)}100%{filter:none}}
+.chat{
       background:var(--panel);
       border-right:1px solid rgba(255,255,255,.1);
       display:flex;
@@ -67,7 +75,7 @@
     .msg{max-width:90%;padding:9px 11px;border-radius:12px;margin:7px 0;line-height:1.34;font-size:14px}
     .msg.them{background:rgba(255,255,255,.09)}
     .msg.me{margin-left:auto;background:rgba(255,151,183,.24)}
-    .typing{min-height:18px;font-size:13px;color:var(--muted);opacity:.85}
+    .typing{min-height:18px;font-size:13px;color:var(--muted);opacity:0;transition:opacity .25s ease}
 
     .btn{padding:12px 14px;border-radius:12px;color:#fff;font-weight:700;background:linear-gradient(90deg,var(--pink1),var(--pink2));min-height:44px}
     .btn.secondary{background:rgba(255,255,255,.12);font-weight:600}
@@ -117,8 +125,8 @@
       overflow-x:hidden;
       -webkit-overflow-scrolling:touch;
     }
-    .final-overlay.show{display:block;animation:fadeIn .9s ease both}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .final-overlay.show{display:block;animation:fadeIn 1s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:scale(1.02);filter:blur(5px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
 
     .final-card{
       width:min(92%,840px);
@@ -140,11 +148,25 @@
       -webkit-overflow-scrolling:touch;
     }
     .romantic{
-      white-space:pre-line;
+      white-space:normal;
       font:700 clamp(23px,2.2vw,34px)/1.26 'Cormorant Garamond',serif;
       color:#fff7fb;
-      text-shadow:0 0 12px rgba(255,134,178,.58),0 0 26px rgba(255,134,178,.25);
+      text-shadow:0 0 12px rgba(255,134,178,.45),0 0 22px rgba(255,134,178,.2);
+      word-break:normal;
+      overflow-wrap:normal;
+      hyphens:none;
+      text-wrap:pretty;
     }
+    .rom-paragraph{
+      margin:0 0 14px;
+      line-height:1.35;
+      opacity:0;
+      transform:translateY(8px);
+      animation:parReveal .7s ease forwards;
+    }
+    .rom-paragraph:last-child{margin-bottom:0}
+    @keyframes parReveal{to{opacity:1;transform:translateY(0)}}
+
     .rom-char{
       opacity:0;
       transform:translateY(9px) scale(.985);
@@ -171,10 +193,13 @@
       outline:none;
     }
     #heartBtn:focus-visible{box-shadow:0 0 0 3px rgba(255,255,255,.8),0 0 0 8px rgba(255,95,143,.35)}
-    #heartBtn svg{width:136px;height:136px;animation:pulse 1.8s ease-in-out infinite;filter:drop-shadow(0 10px 14px rgba(0,0,0,.32))}
+    #heartBtn img{width:132px;height:132px;object-fit:contain;animation:pulse 1.9s ease-in-out infinite;filter:drop-shadow(0 14px 18px rgba(0,0,0,.34)) drop-shadow(0 0 18px rgba(255,140,195,.35));transform:translateZ(0)}
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
     .video-wrap{
+      opacity:0;
+      transform:scale(.985);
+      transition:opacity .5s ease, transform .5s ease;
       width:100%;
       max-height:calc(100vh - 140px);
       overflow-y:auto;
@@ -311,43 +336,7 @@
 
               <div class="heart-wrap" id="heartWrap">
                 <div id="heartBtn" role="button" tabindex="0" aria-label="сердечко">
-                  <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <defs>
-                      <linearGradient id="kittyHeartGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#ffd9e8"/>
-                        <stop offset="55%" stop-color="#ff7cab"/>
-                        <stop offset="100%" stop-color="#ff4f8f"/>
-                      </linearGradient>
-                      <radialGradient id="kittyGlow" cx="30%" cy="25%" r="60%">
-                        <stop offset="0%" stop-color="#fff" stop-opacity=".7"/>
-                        <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
-                      </radialGradient>
-                      <filter id="kittyShadow" x="-40%" y="-40%" width="180%" height="200%">
-                        <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#000" flood-opacity=".28"/>
-                      </filter>
-                    </defs>
-                    <g filter="url(#kittyShadow)">
-                      <path d="M110 194c-20-14-77-54-93-84-16-29 0-67 33-76 24-7 47 3 60 23 13-20 36-30 60-23 33 9 49 47 33 76-16 30-73 70-93 84z" fill="url(#kittyHeartGrad)"/>
-                      <path d="M110 194c-20-14-77-54-93-84-16-29 0-67 33-76 24-7 47 3 60 23 13-20 36-30 60-23 33 9 49 47 33 76-16 30-73 70-93 84z" fill="url(#kittyGlow)"/>
-                    </g>
-                    <g transform="translate(0,4)">
-                      <ellipse cx="110" cy="105" rx="39" ry="30" fill="#fff8fb" opacity=".95"/>
-                      <ellipse cx="96" cy="102" rx="3.2" ry="4" fill="#2a1f27"/>
-                      <ellipse cx="124" cy="102" rx="3.2" ry="4" fill="#2a1f27"/>
-                      <ellipse cx="110" cy="112" rx="4.5" ry="3.5" fill="#f7d557"/>
-                      <path d="M68 101h18M66 109h18M68 117h18M136 101h18M136 109h18M136 117h18" stroke="#fff" stroke-width="2.3" stroke-linecap="round" opacity=".9"/>
-                      <g transform="translate(127 77)">
-                        <ellipse cx="7" cy="8" rx="8" ry="7" fill="#ff4f8f"/>
-                        <ellipse cx="20" cy="8" rx="8" ry="7" fill="#ff4f8f"/>
-                        <circle cx="13.5" cy="8" r="3.2" fill="#ffd8e8"/>
-                      </g>
-                    </g>
-                    <g transform="rotate(-14 110 110)">
-                      <line x1="27" y1="111" x2="193" y2="111" stroke="#f9f9ff" stroke-width="8" stroke-linecap="round"/>
-                      <polygon points="23,111 43,98 43,124" fill="#f9f9ff"/>
-                      <polygon points="197,111 175,101 175,121" fill="#f9f9ff"/>
-                    </g>
-                  </svg>
+                  <img src="hello-kitty-heart.png" alt="сердечко">
                 </div>
                 <div>сердечко тык</div>
               </div>
@@ -461,6 +450,10 @@
     }
 
     async function runIntro(){
+      document.querySelector('.bg-shade').style.opacity = '.92';
+      await wait(240);
+      document.querySelector('.app').classList.add('awake');
+      await wait(420);
       for (const line of intro){
         typing.style.opacity = '1';
         await wait(520);
@@ -620,9 +613,10 @@
       clickSound.currentTime = 0;
       clickSound.play().catch(() => {});
 
-      item.el.style.transition = 'transform .22s ease, opacity .22s ease';
+      item.el.style.transition = 'transform .28s cubic-bezier(.2,.8,.2,1), opacity .28s ease, filter .28s ease';
       item.el.style.opacity = '0';
-      item.el.style.transform += ' scale(.72)';
+      item.el.style.filter = 'drop-shadow(0 0 10px rgba(255,170,210,.8)) brightness(1.1)';
+      item.el.style.transform += ' translateY(-12px) scale(.68)';
       setTimeout(() => item.el.remove(), 220);
 
       active = active.filter(x => x !== item);
@@ -669,29 +663,34 @@
     }
 
     function buildRomanticLetters(){
-      const raw = romanticText.textContent;
-      romanticText.textContent = '';
-      const frag = document.createDocumentFragment();
+      const paragraphs = [
+        'Поля, котичка, я знаю тебя так недолго, всего два с половиной месяца, но во мне теплится чувство будто я знал тебя во всех своих прошлых жизнях, ведь более идеального метча на Земле еще не было. И не будет.',
+        'Ты каждый день даришь мне ту самую искреннюю детскую радость и улыбку, которых у меня очень давно не было. Полгода назад я и представить не мог, что смогу привязаться так сильно к кому-то, как к тебе.',
+        'Если бы я был слепым — ты была бы моим зрением. Если бы я был глухим — ты была бы моим слухом. Если бы я был немым — ты была бы моим голосом. Если бы не было тебя — не было бы меня <3 Даже когда ты злишься или обижаешься - мое отношение к тебе ничуть не меняется.',
+        'Я люблю каждый твой недостаток, каждый изъянчик, каждое несовершенство. Ты мне нужна именно такой, какая ты есть. Именно ТЫ, и никто больше.'
+      ];
+      romanticText.innerHTML = '';
       let idx = 0;
-      for (let i = 0; i < raw.length; i++) {
-        const ch = raw[i];
-        if (ch === '\n') {
-          frag.appendChild(document.createElement('br'));
-          continue;
+      paragraphs.forEach((paragraph, pIndex) => {
+        const p = document.createElement('p');
+        p.className = 'rom-paragraph';
+        p.style.animationDelay = `${pIndex * 240}ms`;
+        for (let i = 0; i < paragraph.length; i++) {
+          const ch = paragraph[i];
+          if (ch === ' ') {
+            p.appendChild(document.createTextNode(' '));
+            continue;
+          }
+          const span = document.createElement('span');
+          span.className = 'rom-char';
+          span.textContent = ch;
+          span.style.setProperty('--d', `${idx * 14}ms`);
+          span.style.setProperty('--jd', `${(idx % 12) * 110}ms`);
+          p.appendChild(span);
+          idx++;
         }
-        if (ch === ' ') {
-          frag.appendChild(document.createTextNode(' '));
-          continue;
-        }
-        const span = document.createElement('span');
-        span.className = 'rom-char';
-        span.textContent = ch;
-        span.style.setProperty('--d', `${idx * 18}ms`);
-        span.style.setProperty('--jd', `${(idx % 11) * 140}ms`);
-        frag.appendChild(span);
-        idx++;
-      }
-      romanticText.appendChild(frag);
+        romanticText.appendChild(p);
+      });
     }
 
     async function finishGame(){
@@ -702,6 +701,10 @@
       active = [];
 
       buildRomanticLetters();
+      game.style.transition = 'filter .7s ease, transform .7s ease';
+      game.style.filter = 'blur(2px) brightness(.86)';
+      game.style.transform = 'scale(.992)';
+      await wait(260);
       finalOverlay.classList.add('show');
       finalOverlay.setAttribute('aria-hidden', 'false');
       dropZone.style.display = 'none';
@@ -715,23 +718,33 @@
       frame.classList.add('started');
       addMessage('Окей, начинаем!', 'me');
       startMusic();
-      await wait(420);
+      frame.classList.add('glitch-flash');
+      await wait(380);
+      frame.classList.remove('glitch-flash');
+      await wait(220);
       startGame();
       startBtn.disabled = true;
     });
 
-    function showFinalVideo(){
+    async function showFinalVideo(){
       heartWrap.style.display = 'none';
       const romanticWrap = document.getElementById('romanticWrap');
+      romanticWrap.style.opacity = '.2';
+      await wait(220);
       romanticWrap.style.display = 'none';
       stopMusic();
+      await wait(220);
       videoWrap.style.display = 'flex';
+      requestAnimationFrame(() => {
+        videoWrap.style.opacity = '1';
+        videoWrap.style.transform = 'scale(1)';
+      });
       finalVideo.currentTime = 0;
       finalVideo.play().catch(() => {});
       replayBtn.focus();
     }
 
-    heartBtn.addEventListener('click', showFinalVideo);
+    heartBtn.addEventListener('click', () => { showFinalVideo(); });
     heartBtn.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
